@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python/
+env/
+venv/
+.env
+
+# Logs
+logs/
+*.log
+
+# Data
+data/
+
+# IDEs
+.vscode/
+.idea/
+
+# Operating System
+.DS_Store
+Thumbs.db
+
+# Random
+references/data_api/asdf.json
+TODO.md
+references/data_api/ccdata_openapi_spec.json

@@ -1,0 +1,18 @@
+# Steps to Retrieve Asset Endpoint Line Numbers
+
+1. Identified the OpenAPI spec file: references/data_api/ccdata_openapi_spec.json.
+2. Searched for asset-related endpoints using keywords and context search (e.g., "Asset", "assets", "metadata", "toplist", "search", "summary", "events").
+3. Located the start line of each asset endpoint by matching the path key in the JSON.
+4. For each endpoint, read the file from its start line to just before the next endpoint to determine the end line.
+5. Recorded the start and end line numbers for each endpoint.
+6. Saved the results in this file for future reference and automation.
+
+# Asset Endpoint Line Numbers
+
+/asset/v2/metadata: 35157-35535
+/asset/v1/top/list: 35536-36253
+/asset/v1/top/list/consensus-mechanism: 36254-36802
+/asset/v1/top/list/hashing-algorithm-type: 36803-38977
+/asset/v1/search: 38826-38977
+/asset/v1/summary/list: 38978-39197
+/asset/v1/events: 39198-

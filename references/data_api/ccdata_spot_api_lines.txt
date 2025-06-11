@@ -1,0 +1,21 @@
+# Steps to Retrieve Spot Endpoint Line Numbers
+
+1. Identified the OpenAPI spec file: `references/data_api/ccdata_openapi_spec.json`.
+2. Searched for all endpoint paths containing "spot" using keyword and context search.
+3. Located the start line of each `/spot/...` endpoint by matching the path key in the JSON.
+4. For each endpoint, read the file from its start line to just before the next endpoint to determine the end line.
+5. Recorded the start and end line numbers for each endpoint.
+6. Saved the results in this file for future reference and automation.
+
+# Spot Endpoint Line Numbers
+
+/spot/v1/latest/tick: 7102-7499  
+/spot/v1/historical/days: 7500-7965  
+/spot/v1/historical/hours: 7966-8431  
+/spot/v1/historical/minutes: 8432-8897  
+/spot/v2/historical/trades/hour: 8898-9360  
+/spot/v2/historical/trades: 9361-9840  
+/spot/v1/historical/orderbook/l2/metrics/minute: 9841-10239  
+/spot/v2/historical/orderbook/l2/snapshots/minute: 10240-10544  
+/spot/v1/historical/orderbook/l2/consolidated/metrics/minute: 10545-10938  
+/spot/v1/historical/orderbook/l2/consolidated/snapshots/minute: 10939-11236
