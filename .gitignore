@@ -28,3 +28,5 @@ references/data_api/asdf.json
 TODO.md
 references/data_api/ccdata_openapi_spec.json
 references/data_api/toplist_response.json
+references/data_api/spot_markets_instruments_response.json
+references/min_api/exchanges_general_response.json

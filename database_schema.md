@@ -231,3 +231,99 @@ This table stores time-series market data (price, market cap, volume) for assets
 **Primary Key:** (`asset_id`, `snapshot_ts`)
 **Shard Key:** `asset_id`
 **Sort Key:** (`asset_id`, `snapshot_ts DESC`)
+
+## Table: `market.cc_exchanges_general`
+
+This table stores general information about cryptocurrency exchanges from CryptoCompare.
+
+| Column Name           | Type                                          | Nullable | Description                               |
+|-----------------------|-----------------------------------------------|----------|-------------------------------------------|
+| `exchange_api_id`     | `VARCHAR(255)`                                | NO       | Unique identifier for the exchange from the API. |
+| `name`                | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | The display name of the exchange.         |
+| `internal_name`       | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | CryptoCompare's internal name for the exchange (e.g., `kraken`). |
+| `api_url_path`        | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | API URL path for the exchange.            |
+| `logo_url_path`       | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | URL path to the exchange's logo.          |
+| `item_types`          | `JSON`                                        | YES      | JSON array of item types supported by the exchange. |
+| `centralization_type` | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | Type of centralization (e.g., `CENTRALIZED`). |
+| `grade_points`        | `DOUBLE`                                      | YES      | Overall grade points.                     |
+| `grade`               | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | Overall grade (e.g., `A+`).               |
+| `grade_points_legal`  | `DOUBLE`                                      | YES      | Grade points for legal aspects.           |
+| `grade_points_kyc_risk`| `DOUBLE`                                      | YES      | Grade points for KYC risk.                |
+| `grade_points_team`   | `DOUBLE`                                      | YES      | Grade points for team quality.            |
+| `grade_points_data_provision`| `DOUBLE`                               | YES      | Grade points for data provision.          |
+| `grade_points_asset_quality`| `DOUBLE`                               | YES      | Grade points for asset quality.           |
+| `grade_points_market_quality`| `DOUBLE`                               | YES      | Grade points for market quality.          |
+| `grade_points_security`| `DOUBLE`                                      | YES      | Grade points for security.                |
+| `grade_points_neg_reports_penalty`| `DOUBLE`                         | YES      | Penalty points for negative reports.      |
+| `affiliate_url`       | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | Affiliate URL for the exchange.           |
+| `country`             | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | Country of operation.                     |
+| `has_orderbook`       | `BOOLEAN`                                     | YES      | Indicates if the exchange has an orderbook. |
+| `has_trades`          | `BOOLEAN`                                     | YES      | Indicates if the exchange has trades.     |
+| `description`         | `TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | Description of the exchange.              |
+| `full_address`        | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | Full address of the exchange.             |
+| `is_sponsored`        | `BOOLEAN`                                     | YES      | Indicates if the exchange is sponsored.   |
+| `is_recommended`      | `BOOLEAN`                                     | YES      | Indicates if the exchange is recommended. |
+| `rating_avg`          | `DOUBLE`                                      | YES      | Average user rating.                      |
+| `rating_total_users`  | `INT`                                         | YES      | Total number of users who rated.          |
+| `sort_order`          | `INT`                                         | YES      | Sort order for display.                   |
+| `total_volume_24h_usd`| `DOUBLE`                                      | YES      | Total 24-hour volume in USD.              |
+| `created_at`          | `DATETIME`                                    | NO       | Local record creation timestamp.          |
+| `updated_at`          | `DATETIME`                                    | NO       | Local record update timestamp.            |
+
+**Primary Key:** (`exchange_api_id`)
+**Shard Key:** (`internal_name`)
+**Sort Key:** (`internal_name`, `name`)
+
+## Table: `market.cc_exchange_spot_details`
+
+This table stores spot market-specific details for exchanges from CryptoCompare's `/spot/v1/markets/instruments` endpoint.
+
+| Column Name                   | Type                                          | Nullable | Description                                     |
+|-------------------------------|-----------------------------------------------|----------|-------------------------------------------------|
+| `exchange_internal_name`      | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | CryptoCompare's internal name for the exchange (e.g., `kraken`). Foreign key to `market.cc_exchanges_general.internal_name`. |
+| `api_exchange_type`           | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | The type of exchange as reported by the API (`TYPE` field). |
+| `exchange_status`             | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | The operational status of the exchange (`EXCHANGE_STATUS`). |
+| `mapped_instruments_total`    | `INT`                                         | YES      | Total count of mapped instruments on the exchange. |
+| `unmapped_instruments_total`  | `INT`                                         | YES      | Total count of unmapped instruments on the exchange. |
+| `instruments_active_count`    | `INT`                                         | YES      | Number of active instruments.                   |
+| `instruments_ignored_count`   | `INT`                                         | YES      | Number of ignored instruments.                  |
+| `instruments_retired_count`   | `INT`                                         | YES      | Number of retired instruments.                  |
+| `instruments_expired_count`   | `INT`                                         | YES      | Number of expired instruments.                  |
+| `instruments_retired_unmapped_count`| `INT`                                   | YES      | Number of retired unmapped instruments.         |
+| `total_trades_exchange_level` | `BIGINT`                                      | YES      | Total spot trades at the exchange level.        |
+| `has_orderbook_l2_snapshots`  | `BOOLEAN`                                     | YES      | Indicates if the exchange has L2 minute snapshots enabled. |
+| `api_data_retrieved_datetime` | `DATETIME`                                    | YES      | Timestamp when this specific API data was retrieved. |
+| `created_at`                  | `DATETIME`                                    | NO       | Local record creation timestamp.                |
+| `updated_at`                  | `DATETIME`                                    | NO       | Local record update timestamp.                  |
+
+**Primary Key:** (`exchange_internal_name`)
+**Shard Key:** (`exchange_internal_name`)
+**Sort Key:** (`exchange_internal_name`)
+
+## Table: `market.cc_instruments_spot`
+
+This table stores details for individual spot market instruments from CryptoCompare's `/spot/v1/markets/instruments` endpoint.
+
+| Column Name                       | Type                                          | Nullable | Description                               |
+|-----------------------------------|-----------------------------------------------|----------|-------------------------------------------|
+| `exchange_internal_name`          | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | CryptoCompare's internal name for the exchange. Part of PK, FK to `market.cc_exchange_spot_details`. |
+| `mapped_instrument_symbol`        | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | The mapped instrument symbol (e.g., `BTC-USD`). Part of PK. |
+| `api_instrument_type`             | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | The type of instrument as reported by the API (`TYPE` field). |
+| `instrument_status_on_exchange`   | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | The status of the instrument on the exchange (`INSTRUMENT_STATUS`). |
+| `exchange_instrument_symbol_raw`  | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | The raw instrument symbol on the exchange (`INSTRUMENT`). |
+| `base_asset_symbol`               | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | The base asset symbol (e.g., `BTC`).      |
+| `base_asset_id`                   | `BIGINT`                                      | YES      | Internal ID for the base asset. FK to `market.cc_assets`. |
+| `quote_asset_symbol`              | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | The quote asset symbol (e.g., `USD`).     |
+| `quote_asset_id`                  | `BIGINT`                                      | YES      | Internal ID for the quote asset. FK to `market.cc_assets`. |
+| `transform_function`              | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | Function applied to transform the instrument data. |
+| `instrument_mapping_created_datetime`| `DATETIME`                                 | YES      | Timestamp when the instrument mapping was created (converted from Unix ts). |
+| `has_trades`                      | `BOOLEAN`                                     | YES      | Indicates if the instrument has trades.   |
+| `first_trade_datetime`            | `DATETIME`                                    | YES      | Timestamp of the first trade for this instrument (converted from Unix ts). |
+| `last_trade_datetime`             | `DATETIME`                                    | YES      | Timestamp of the last trade for this instrument (converted from Unix ts). |
+| `total_trades_instrument_level`   | `BIGINT`                                      | YES      | Total spot trades for this instrument.    |
+| `created_at`                      | `DATETIME`                                    | NO       | Local record creation timestamp.          |
+| `updated_at`                      | `DATETIME`                                    | NO       | Local record update timestamp.            |
+
+**Primary Key:** (`exchange_internal_name`, `mapped_instrument_symbol`)
+**Shard Key:** (`exchange_internal_name`, `mapped_instrument_symbol`)
+**Sort Key:** (`exchange_internal_name`, `mapped_instrument_symbol`, `last_trade_datetime DESC`)

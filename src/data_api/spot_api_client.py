@@ -191,6 +191,40 @@ class CcdataSpotApiClient(CcdataBaseApiClient):
         )
         return self._request("GET", endpoint, params=params)
 
+    def get_spot_market_instruments(
+        self,
+        market: Optional[str] = None,
+        instrument: Optional[str] = None,
+        groups: Optional[List[str]] = None,
+        extra_params: Optional[str] = None,
+        sign: Optional[bool] = None,
+    ) -> dict:
+        """
+        Returns all the spot market instruments for all exchanges that CryptoCompare has integrated with.
+        You can filter by exchange and instrument.
+
+        Args:
+            market (str, optional): The exchange to obtain data from. Defaults to None.
+            instrument (str, optional): A mapped and/or unmapped instrument to retrieve. Defaults to None.
+            groups (list, optional): Filter by specific groups of interest. Defaults to None.
+            extra_params (str, optional): The name of your application. Defaults to None.
+            sign (bool, optional): If set to true, the server will sign the requests. Defaults to None.
+
+        Returns:
+            dict: A dictionary containing spot market instruments data.
+        """
+        endpoint = "/spot/v1/markets/instruments"
+        params = {
+            "market": market,
+            "instrument": instrument,
+            "groups": ",".join(groups) if groups else None,
+            "extraParams": extra_params,
+            "sign": str(sign).lower() if sign is not None else None,
+        }
+        params = {k: v for k, v in params.items() if v is not None}
+        logger.info(f"Fetching spot market instruments with params: {params}")
+        return self._request("GET", endpoint, params=params)
+
 
 if __name__ == "__main__":
     print("Attempting to initialize CcdataSpotApiClient...")

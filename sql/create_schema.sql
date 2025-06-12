@@ -236,3 +236,137 @@ CREATE TABLE
             SHARD KEY (`asset_id`),
             SORT KEY (`asset_id`, `snapshot_ts` DESC)
     );
+
+CREATE TABLE
+    IF NOT EXISTS `market`.`cc_exchanges_general` (
+        `exchange_api_id` VARCHAR(255) NOT NULL,
+        `name` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+            `internal_name` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci NOT NULL UNIQUE,
+            `api_url_path` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `logo_url_path` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `item_types` JSON,
+            `centralization_type` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `grade_points` DOUBLE,
+            `grade` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `grade_points_legal` DOUBLE,
+            `grade_points_kyc_risk` DOUBLE,
+            `grade_points_team` DOUBLE,
+            `grade_points_data_provision` DOUBLE,
+            `grade_points_asset_quality` DOUBLE,
+            `grade_points_market_quality` DOUBLE,
+            `grade_points_security` DOUBLE,
+            `grade_points_neg_reports_penalty` DOUBLE,
+            `affiliate_url` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `country` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `has_orderbook` BOOLEAN,
+            `has_trades` BOOLEAN,
+            `description` TEXT CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `full_address` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `is_sponsored` BOOLEAN,
+            `is_recommended` BOOLEAN,
+            `rating_avg` DOUBLE,
+            `rating_total_users` INT,
+            `sort_order` INT,
+            `total_volume_24h_usd` DOUBLE,
+            `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            SHARD KEY (`internal_name`),
+            SORT KEY (`internal_name`, `name`)
+    );
+
+CREATE TABLE
+    IF NOT EXISTS `market`.`cc_exchange_spot_details` (
+        `exchange_internal_name` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+            `api_exchange_type` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `exchange_status` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `mapped_instruments_total` INT,
+            `unmapped_instruments_total` INT,
+            `instruments_active_count` INT,
+            `instruments_ignored_count` INT,
+            `instruments_retired_count` INT,
+            `instruments_expired_count` INT,
+            `instruments_retired_unmapped_count` INT,
+            `total_trades_exchange_level` BIGINT,
+            `has_orderbook_l2_snapshots` BOOLEAN,
+            `api_data_retrieved_datetime` DATETIME,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            SHARD KEY (`exchange_internal_name`),
+            SORT KEY (`exchange_internal_name`)
+    );
+
+CREATE TABLE
+    IF NOT EXISTS `market`.`cc_instruments_spot` (
+        `exchange_internal_name` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+            `mapped_instrument_symbol` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+            `api_instrument_type` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `instrument_status_on_exchange` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `exchange_instrument_symbol_raw` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `base_asset_symbol` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `base_asset_id` BIGINT,
+            `quote_asset_symbol` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `quote_asset_id` BIGINT,
+            `transform_function` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `instrument_mapping_created_datetime` DATETIME,
+            `has_trades` BOOLEAN,
+            `first_trade_datetime` DATETIME,
+            `last_trade_datetime` DATETIME,
+            `total_trades_instrument_level` BIGINT,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            PRIMARY KEY (
+                `exchange_internal_name`,
+                `mapped_instrument_symbol`
+            ),
+            SHARD KEY (
+                `exchange_internal_name`,
+                `mapped_instrument_symbol`
+            ),
+            SORT KEY (
+                `exchange_internal_name`,
+                `mapped_instrument_symbol`,
+                `last_trade_datetime` DESC
+            )
+    );
