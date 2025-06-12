@@ -317,6 +317,4 @@ def ingest_asset_data():
 
 if __name__ == "__main__":
     logger.info("Attempting to ingest asset data...")
-    # ingest_asset_data()
-    db_manager = DbConnectionManager()
-    deduplicate_all_tables(db_manager=db_manager)
+    ingest_asset_data()
