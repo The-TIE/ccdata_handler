@@ -81,3 +81,153 @@ This table stores daily Open, High, Low, Close, and Volume (OHLCV) data for cryp
 
 **Shard Key:** (`datetime`, `market`, `asset`)
 **Sort Key:** (`datetime`, `market`, `asset`)
+
+## Table: `market.cc_assets`
+
+This table stores general information about each unique asset.
+
+| Column Name           | Type                                          | Nullable | Description                               |
+|-----------------------|-----------------------------------------------|----------|-------------------------------------------|
+| `asset_id`            | `BIGINT`                                      | NO       | Unique identifier for the asset.          |
+| `symbol`              | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | The symbol of the asset.                  |
+| `name`                | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | The name of the asset.                    |
+| `uri`                 | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | URI for the asset.                        |
+| `asset_type`          | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | Type of asset.                            |
+| `cc_internal_type`    | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | CryptoCompare internal type.              |
+| `id_legacy`           | `BIGINT`                                      | NO       | Legacy ID.                                |
+| `id_parent_asset`     | `BIGINT`                                      | YES      | Parent asset ID.                          |
+| `id_asset_issuer`     | `BIGINT`                                      | YES      | Asset issuer ID.                          |
+| `asset_issuer_name`   | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | Name of the asset issuer.                 |
+| `parent_asset_symbol` | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | Symbol of the parent asset.               |
+| `cc_created_on`       | `DATETIME`                                    | NO       | CryptoCompare creation timestamp (converted from Unix ts). |
+| `cc_updated_on`       | `DATETIME`                                    | NO       | CryptoCompare update timestamp (converted from Unix ts).   |
+| `public_notice`       | `TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | Public notice for the asset.              |
+| `logo_url`            | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | URL of the asset logo.                    |
+| `launch_date`         | `DATETIME`                                    | YES      | Launch date (converted from Unix ts).       |
+| `description_summary` | `TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | Summary of the asset description.         |
+| `decimal_points`      | `INT`                                         | YES      | Decimal points for the asset.             |
+| `symbol_glyph`        | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | Glyph for the asset symbol.               |
+| `created_at`          | `DATETIME`                                    | NO       | Local record creation timestamp.          |
+| `updated_at`          | `DATETIME`                                    | NO       | Local record update timestamp.            |
+
+**Shard Key:** (`asset_id`)
+**Sort Key:** (`symbol`, `asset_id`)
+
+## Table: `market.cc_asset_alternative_ids`
+
+This table stores various alternative IDs for assets.
+
+| Column Name           | Type                                          | Nullable | Description                               |
+|-----------------------|-----------------------------------------------|----------|-------------------------------------------|
+| `asset_id`            | `BIGINT`                                      | NO       | Foreign key to `market.cc_assets`.        |
+| `id_source_name`      | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | Source name of the alternative ID.        |
+| `alternative_id_value`| `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | Value of the alternative ID.              |
+| `created_at`          | `DATETIME`                                    | NO       | Local record creation timestamp.          |
+| `updated_at`          | `DATETIME`                                    | NO       | Local record update timestamp.            |
+
+**Primary Key:** (`asset_id`, `id_source_name`, `alternative_id_value`)
+**Shard Key:** (`asset_id`)
+**Sort Key:** (`asset_id`, `id_source_name`)
+
+## Table: `market.cc_asset_industries_map`
+
+This table maps assets to their industries.
+
+| Column Name           | Type                                          | Nullable | Description                               |
+|-----------------------|-----------------------------------------------|----------|-------------------------------------------|
+| `asset_id`            | `BIGINT`                                      | NO       | Foreign key to `market.cc_assets`.        |
+| `industry_name`       | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | Name of the industry.                     |
+| `justification`       | `TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | Justification for the industry mapping.   |
+| `created_at`          | `DATETIME`                                    | NO       | Local record creation timestamp.          |
+| `updated_at`          | `DATETIME`                                    | NO       | Local record update timestamp.            |
+
+**Primary Key:** (`asset_id`, `industry_name`)
+**Shard Key:** (`asset_id`)
+**Sort Key:** (`asset_id`, `industry_name`)
+
+## Table: `market.cc_asset_consensus_mechanisms_map`
+
+This table maps assets to their consensus mechanisms.
+
+| Column Name           | Type                                          | Nullable | Description                               |
+|-----------------------|-----------------------------------------------|----------|-------------------------------------------|
+| `asset_id`            | `BIGINT`                                      | NO       | Foreign key to `market.cc_assets`.        |
+| `mechanism_name`      | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | Name of the consensus mechanism.          |
+| `created_at`          | `DATETIME`                                    | NO       | Local record creation timestamp.          |
+| `updated_at`          | `DATETIME`                                    | NO       | Local record update timestamp.            |
+
+**Primary Key:** (`asset_id`, `mechanism_name`)
+**Shard Key:** (`asset_id`)
+**Sort Key:** (`asset_id`, `mechanism_name`)
+
+## Table: `market.cc_asset_consensus_algorithm_types_map`
+
+This table maps assets to their consensus algorithm types.
+
+| Column Name           | Type                                          | Nullable | Description                               |
+|-----------------------|-----------------------------------------------|----------|-------------------------------------------|
+| `asset_id`            | `BIGINT`                                      | NO       | Foreign key to `market.cc_assets`.        |
+| `algorithm_name`      | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | Name of the consensus algorithm.          |
+| `description`         | `TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | Description of the algorithm.             |
+| `created_at`          | `DATETIME`                                    | NO       | Local record creation timestamp.          |
+| `updated_at`          | `DATETIME`                                    | NO       | Local record update timestamp.            |
+
+**Primary Key:** (`asset_id`, `algorithm_name`)
+**Shard Key:** (`asset_id`)
+**Sort Key:** (`asset_id`, `algorithm_name`)
+
+## Table: `market.cc_asset_hashing_algorithm_types_map`
+
+This table maps assets to their hashing algorithm types.
+
+| Column Name           | Type                                          | Nullable | Description                               |
+|-----------------------|-----------------------------------------------|----------|-------------------------------------------|
+| `asset_id`            | `BIGINT`                                      | NO       | Foreign key to `market.cc_assets`.        |
+| `algorithm_name`      | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | Name of the hashing algorithm.            |
+| `created_at`          | `DATETIME`                                    | NO       | Local record creation timestamp.          |
+| `updated_at`          | `DATETIME`                                    | NO       | Local record update timestamp.            |
+
+**Primary Key:** (`asset_id`, `algorithm_name`)
+**Shard Key:** (`asset_id`)
+**Sort Key:** (`asset_id`, `algorithm_name`)
+
+## Table: `market.cc_asset_previous_symbols_map`
+
+This table maps assets to their previous symbols.
+
+| Column Name           | Type                                          | Nullable | Description                               |
+|-----------------------|-----------------------------------------------|----------|-------------------------------------------|
+| `asset_id`            | `BIGINT`                                      | NO       | Foreign key to `market.cc_assets`.        |
+| `previous_symbol`     | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | Previous symbol of the asset.             |
+| `created_at`          | `DATETIME`                                    | NO       | Local record creation timestamp.          |
+| `updated_at`          | `DATETIME`                                    | NO       | Local record update timestamp.            |
+
+**Primary Key:** (`asset_id`, `previous_symbol`)
+**Shard Key:** (`asset_id`)
+**Sort Key:** (`asset_id`, `previous_symbol`)
+
+## Table: `market.cc_asset_market_data`
+
+This table stores time-series market data (price, market cap, volume) for assets.
+
+| Column Name                                   | Type                                          | Nullable | Description                                                                 |
+|-----------------------------------------------|-----------------------------------------------|----------|-----------------------------------------------------------------------------|
+| `asset_id`                                    | `BIGINT`                                      | NO       | Foreign key to `market.cc_assets.asset_id`.                                 |
+| `snapshot_ts`                                 | `DATETIME`                                    | NO       | Timestamp of data snapshot (converted from API's `PRICE_USD_LAST_UPDATE_TS`). |
+| `price_usd`                                   | `DOUBLE`                                      | YES      | Current price in USD.                                                       |
+| `price_usd_source`                            | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | Source of the USD price.                                                    |
+| `mkt_cap_penalty`                             | `DOUBLE`                                      | YES      | Market cap penalty.                                                         |
+| `circulating_mkt_cap_usd`                     | `DOUBLE`                                      | YES      | Circulating market cap in USD.                                              |
+| `total_mkt_cap_usd`                           | `DOUBLE`                                      | YES      | Total market cap in USD.                                                    |
+| `spot_moving_24_hour_quote_volume_top_tier_usd` | `DOUBLE`                                      | YES      | 24-hour spot quote volume (top tier) in USD.                                |
+| `spot_moving_24_hour_quote_volume_usd`          | `DOUBLE`                                      | YES      | 24-hour spot quote volume in USD.                                           |
+| `spot_moving_7_day_quote_volume_top_tier_usd`   | `DOUBLE`                                      | YES      | 7-day spot quote volume (top tier) in USD.                                  |
+| `spot_moving_7_day_quote_volume_usd`            | `DOUBLE`                                      | YES      | 7-day spot quote volume in USD.                                             |
+| `spot_moving_30_day_quote_volume_top_tier_usd`  | `DOUBLE`                                      | YES      | 30-day spot quote volume (top tier) in USD.                                 |
+| `spot_moving_30_day_quote_volume_usd`           | `DOUBLE`                                      | YES      | 30-day spot quote volume in USD.                                            |
+| `created_at`                                  | `DATETIME`                                    | NO       | Local record creation timestamp.                                            |
+| `updated_at`                                  | `DATETIME`                                    | NO       | Local record update timestamp.                                              |
+
+**Primary Key:** (`asset_id`, `snapshot_ts`)
+**Shard Key:** `asset_id`
+**Sort Key:** (`asset_id`, `snapshot_ts DESC`)
