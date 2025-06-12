@@ -47,8 +47,10 @@ def fetch_asset_data(asset_client, page_size=100):
         page_assets = response["Data"]["LIST"]
         assets_data.extend(page_assets)
         if total_assets is None:
-            total_assets = response.get("TotalCount", len(page_assets))
-        if len(page_assets) < page_size or (page * page_size) >= total_assets:
+            total_assets = (
+                response["Data"].get("STATS", {}).get("TOTAL_ASSETS", len(page_assets))
+            )
+        if len(page_assets) == 0 or (page * page_size) >= total_assets:
             break
         page += 1
     logger.info(f"Fetched {len(assets_data)} assets.")
