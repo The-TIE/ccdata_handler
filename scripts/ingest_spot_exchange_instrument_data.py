@@ -6,6 +6,7 @@ from src.data_api.spot_api_client import CcdataSpotApiClient
 from src.db.connection import DbConnectionManager
 from src.logger_config import setup_logger
 from src.db.utils import to_mysql_datetime, deduplicate_table
+from src.rate_limit_tracker import record_rate_limit_status
 
 # Load environment variables from .env file
 load_dotenv()
@@ -183,6 +184,7 @@ def deduplicate_spot_exchange_instrument_tables(db_manager):
 def ingest_spot_exchange_instrument_data():
     """Orchestrates the spot exchange and instrument data ingestion pipeline."""
     logger.info("Starting spot exchange and instrument data ingestion process.")
+    record_rate_limit_status("ingest_spot_exchange_instrument_data", "pre")
 
     api_key = os.getenv("CCDATA_API_KEY")
     if not api_key:
@@ -209,6 +211,7 @@ def ingest_spot_exchange_instrument_data():
             deduplicate_spot_exchange_instrument_tables(db_manager)
             db_manager.close_connection()
         logger.info("Spot exchange and instrument data ingestion process finished.")
+    record_rate_limit_status("ingest_spot_exchange_instrument_data", "post")
 
 
 if __name__ == "__main__":

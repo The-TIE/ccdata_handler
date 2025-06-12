@@ -327,3 +327,46 @@ This table stores details for individual spot market instruments from CryptoComp
 **Primary Key:** (`exchange_internal_name`, `mapped_instrument_symbol`)
 **Shard Key:** (`exchange_internal_name`, `mapped_instrument_symbol`)
 **Sort Key:** (`exchange_internal_name`, `mapped_instrument_symbol`, `last_trade_datetime DESC`)
+
+## Table: `market.cc_rate_limit_status`
+
+This table stores information about the API rate limit status.
+
+| Column Name           | Type         | Nullable | Description                               |
+|-----------------------|--------------|----------|-------------------------------------------|
+| `timestamp`           | `DATETIME`   | NO       | The timestamp when the rate limit data was recorded. |
+| `use_case`            | `VARCHAR(255)`| NO       | The use case or script making the API call. |
+| `record_timing`       | `VARCHAR(10)`| NO       | Indicates if the data was recorded 'pre' or 'post' API call. |
+| `api_key_used_second` | `INT`        | YES      | API key usage in the current second.      |
+| `api_key_used_minute` | `INT`        | YES      | API key usage in the current minute.      |
+| `api_key_used_hour`   | `INT`        | YES      | API key usage in the current hour.        |
+| `api_key_used_day`    | `INT`        | YES      | API key usage in the current day.         |
+| `api_key_used_month`  | `INT`        | YES      | API key usage in the current month.       |
+| `api_key_max_second`  | `INT`        | YES      | API key max limit per second.             |
+| `api_key_max_minute`  | `INT`        | YES      | API key max limit per minute.             |
+| `api_key_max_hour`    | `INT`        | YES      | API key max limit per hour.               |
+| `api_key_max_day`     | `INT`        | YES      | API key max limit per day.                |
+| `api_key_max_month`   | `INT`        | YES      | API key max limit per month.              |
+| `api_key_remaining_second`| `INT`    | YES      | API key remaining calls in the current second. |
+| `api_key_remaining_minute`| `INT`    | YES      | API key remaining calls in the current minute. |
+| `api_key_remaining_hour`| `INT`      | YES      | API key remaining calls in the current hour. |
+| `api_key_remaining_day`| `INT`       | YES      | API key remaining calls in the current day. |
+| `api_key_remaining_month`| `INT`     | YES      | API key remaining calls in the current month. |
+| `auth_key_used_second`| `INT`        | YES      | Auth key usage in the current second.     |
+| `auth_key_used_minute`| `INT`        | YES      | Auth key usage in the current minute.     |
+| `auth_key_used_hour`  | `INT`        | YES      | Auth key usage in the current hour.       |
+| `auth_key_used_day`   | `INT`        | YES      | Auth key usage in the current day.        |
+| `auth_key_used_month` | `INT`        | YES      | Auth key usage in the current month.      |
+| `auth_key_max_second` | `INT`        | YES      | Auth key max limit per second.            |
+| `auth_key_max_minute` | `INT`        | YES      | Auth key max limit per minute.            |
+| `auth_key_max_hour`   | `INT`        | YES      | Auth key max limit per hour.              |
+| `auth_key_max_day`    | `INT`        | YES      | Auth key max limit per day.               |
+| `auth_key_max_month`  | `INT`        | YES      | Auth key max limit per month.             |
+| `auth_key_remaining_second`| `INT`   | YES      | Auth key remaining calls in the current second. |
+| `auth_key_remaining_minute`| `INT`   | YES      | Auth key remaining calls in the current minute. |
+| `auth_key_remaining_hour`| `INT`     | YES      | Auth key remaining calls in the current hour. |
+| `auth_key_remaining_day`| `INT`      | YES      | Auth key remaining calls in the current day. |
+| `auth_key_remaining_month`| `INT`    | YES      | Auth key remaining calls in the current month. |
+
+**Shard Key:** (`timestamp`)
+**Sort Key:** (`timestamp`, `use_case`)

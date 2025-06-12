@@ -8,6 +8,7 @@ import argparse
 from src.logger_config import setup_logger
 from src.db.connection import DbConnectionManager
 from src.data_api.spot_api_client import CcdataSpotApiClient
+from src.rate_limit_tracker import record_rate_limit_status
 
 # Load environment variables from .env file
 load_dotenv()
@@ -40,6 +41,8 @@ def ingest_daily_ohlcv_data(
     api_client = CcdataSpotApiClient()
     db = DbConnectionManager()
     table_name = "market.cc_ohlcv_spot_1d_raw"
+
+    record_rate_limit_status("ingest_daily_ohlcv_spot_data", "pre")
 
     logger.info(f"Ingesting daily OHLCV data for {instrument} on {market}")
     try:
@@ -105,6 +108,8 @@ def ingest_daily_ohlcv_data(
             logger.warning(f"No data received for {instrument} on {market}.")
     except Exception as e:
         logger.error(f"Error ingesting daily OHLCV data: {e}")
+    finally:
+        record_rate_limit_status("ingest_daily_ohlcv_spot_data", "post")
 
 
 if __name__ == "__main__":

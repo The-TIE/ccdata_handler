@@ -10,6 +10,7 @@ from src.db.connection import DbConnectionManager
 from src.data_api.spot_api_client import CcdataSpotApiClient
 from src.data_api.asset_api_client import CcdataAssetApiClient
 from src.min_api.general_info_api_client import MinApiGeneralInfoApiClient
+from src.rate_limit_tracker import record_rate_limit_status
 
 # Load environment variables from .env file
 load_dotenv()
@@ -306,6 +307,7 @@ def main():
     print(
         "Attempting to ingest daily OHLCV spot data for top assets on qualified exchanges..."
     )
+    record_rate_limit_status("ingest_ohlcv_spot_1d_top_pairs", "pre")
 
     db_connection = DbConnectionManager()
     spot_api_client = CcdataSpotApiClient()
@@ -352,6 +354,7 @@ def main():
     logger.info(
         "Daily OHLCV spot data ingestion for top assets on qualified exchanges completed."
     )
+    record_rate_limit_status("ingest_ohlcv_spot_1d_top_pairs", "post")
 
 
 if __name__ == "__main__":

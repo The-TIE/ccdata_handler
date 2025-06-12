@@ -40,6 +40,16 @@ class CcdataUtilitiesApiClient(CcdataBaseApiClient):
                 "CCDATA_API_KEY is not set. Some Utilities API calls may fail."
             )
 
+    def get_rate_limit_status(self) -> dict:
+        """
+        Retrieves the current API rate limit status for the account.
+
+        Returns:
+            dict: A dictionary containing the rate limit status data.
+        """
+        endpoint = "/admin/v2/rate/limit"
+        return self._get(endpoint)
+
 
 if __name__ == "__main__":
     print("Attempting to initialize CcdataUtilitiesApiClient...")

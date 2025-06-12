@@ -370,3 +370,42 @@ CREATE TABLE
                 `last_trade_datetime` DESC
             )
     );
+
+CREATE TABLE
+    IF NOT EXISTS `market`.`cc_rate_limit_status` (
+        `timestamp` DATETIME NOT NULL,
+        `use_case` VARCHAR(255) NOT NULL,
+        `record_timing` VARCHAR(10) NOT NULL,
+        `api_key_used_second` INT,
+        `api_key_used_minute` INT,
+        `api_key_used_hour` INT,
+        `api_key_used_day` INT,
+        `api_key_used_month` INT,
+        `api_key_max_second` INT,
+        `api_key_max_minute` INT,
+        `api_key_max_hour` INT,
+        `api_key_max_day` INT,
+        `api_key_max_month` INT,
+        `api_key_remaining_second` INT,
+        `api_key_remaining_minute` INT,
+        `api_key_remaining_hour` INT,
+        `api_key_remaining_day` INT,
+        `api_key_remaining_month` INT,
+        `auth_key_used_second` INT,
+        `auth_key_used_minute` INT,
+        `auth_key_used_hour` INT,
+        `auth_key_used_day` INT,
+        `auth_key_used_month` INT,
+        `auth_key_max_second` INT,
+        `auth_key_max_minute` INT,
+        `auth_key_max_hour` INT,
+        `auth_key_max_day` INT,
+        `auth_key_max_month` INT,
+        `auth_key_remaining_second` INT,
+        `auth_key_remaining_minute` INT,
+        `auth_key_remaining_hour` INT,
+        `auth_key_remaining_day` INT,
+        `auth_key_remaining_month` INT,
+        SHARD KEY (`timestamp`),
+        SORT KEY (`timestamp`, `use_case`)
+    );

@@ -9,6 +9,7 @@ from src.logger_config import setup_logger
 from src.db.connection import DbConnectionManager
 from src.data_api.indices_ref_rates_api_client import CcdataIndicesRefRatesApiClient
 from src.data_api.asset_api_client import CcdataAssetApiClient
+from src.rate_limit_tracker import record_rate_limit_status
 
 # Load environment variables from .env file
 load_dotenv()
@@ -230,6 +231,7 @@ def main():
     args = parser.parse_args()
 
     print("Attempting to ingest daily OHLCV indices data for top assets...")
+    record_rate_limit_status("ingest_ohlcv_indices_1d_top_assets", "pre")
 
     db_connection = DbConnectionManager()
     indices_api_client = CcdataIndicesRefRatesApiClient()
@@ -255,6 +257,7 @@ def main():
 
     db_connection.close_connection()
     logger.info("Daily OHLCV indices data ingestion for top assets completed.")
+    record_rate_limit_status("ingest_ohlcv_indices_1d_top_assets", "post")
 
 
 if __name__ == "__main__":

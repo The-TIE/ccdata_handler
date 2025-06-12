@@ -7,6 +7,7 @@ from src.min_api.general_info_api_client import MinApiGeneralInfoApiClient
 from src.db.connection import DbConnectionManager
 from src.logger_config import setup_logger
 from src.db.utils import to_mysql_datetime, deduplicate_table
+from src.rate_limit_tracker import record_rate_limit_status
 
 # Load environment variables from .env file
 load_dotenv()
@@ -115,6 +116,7 @@ def deduplicate_exchanges_general_table(db_manager):
 def ingest_exchanges_general_data():
     """Orchestrates the general exchange data ingestion pipeline."""
     logger.info("Starting general exchange data ingestion process.")
+    record_rate_limit_status("ingest_exchanges_general_data", "pre")
 
     api_key = os.getenv("CCDATA_API_KEY")
     if not api_key:
@@ -141,6 +143,7 @@ def ingest_exchanges_general_data():
             deduplicate_exchanges_general_table(db_manager)
             db_manager.close_connection()
         logger.info("General exchange data ingestion process finished.")
+    record_rate_limit_status("ingest_exchanges_general_data", "post")
 
 
 if __name__ == "__main__":
