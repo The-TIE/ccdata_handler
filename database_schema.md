@@ -115,19 +115,23 @@ This table stores general information about each unique asset.
 
 ## Table: `market.cc_asset_alternative_ids`
 
-This table stores various alternative IDs for assets.
+This table stores various alternative IDs for assets, with each source having its own column.
 
 | Column Name           | Type                                          | Nullable | Description                               |
 |-----------------------|-----------------------------------------------|----------|-------------------------------------------|
 | `asset_id`            | `BIGINT`                                      | NO       | Foreign key to `market.cc_assets`.        |
-| `id_source_name`      | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | Source name of the alternative ID.        |
-| `alternative_id_value`| `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | Value of the alternative ID.              |
+| `cmc_id`              | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | CoinMarketCap ID.                         |
+| `cg_id`               | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | CoinGecko ID.                             |
+| `isin_id`             | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | International Securities Identification Number. |
+| `valor_id`            | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | Valor ID.                                 |
+| `dti_id`              | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | Digital Token Identifier.                 |
+| `chain_id`            | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | Blockchain Chain ID.                      |
 | `created_at`          | `DATETIME`                                    | NO       | Local record creation timestamp.          |
 | `updated_at`          | `DATETIME`                                    | NO       | Local record update timestamp.            |
 
-**Primary Key:** (`asset_id`, `id_source_name`, `alternative_id_value`)
+**Primary Key:** (`asset_id`)
 **Shard Key:** (`asset_id`)
-**Sort Key:** (`asset_id`, `id_source_name`)
+**Sort Key:** (`asset_id`)
 
 ## Table: `market.cc_asset_industries_map`
 

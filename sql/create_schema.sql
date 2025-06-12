@@ -123,24 +123,34 @@ CREATE TABLE
             SORT KEY (`symbol`, `asset_id`)
     );
 
+DROP TABLE IF EXISTS `market`.`cc_asset_alternative_ids`;
+
 CREATE TABLE
     IF NOT EXISTS `market`.`cc_asset_alternative_ids` (
         `asset_id` BIGINT NOT NULL,
-        `id_source_name` VARCHAR(255) CHARACTER
+        `cmc_id` VARCHAR(255) CHARACTER
         SET
-            utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-            `alternative_id_value` VARCHAR(255) CHARACTER
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `cg_id` VARCHAR(255) CHARACTER
         SET
-            utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `isin_id` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `valor_id` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `dti_id` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `chain_id` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
             `created_at` DATETIME NOT NULL,
             `updated_at` DATETIME NOT NULL,
-            PRIMARY KEY (
-                `asset_id`,
-                `id_source_name`,
-                `alternative_id_value`
-            ),
+            PRIMARY KEY (`asset_id`),
             SHARD KEY (`asset_id`),
-            SORT KEY (`asset_id`, `id_source_name`)
+            SORT KEY (`asset_id`)
     );
 
 CREATE TABLE

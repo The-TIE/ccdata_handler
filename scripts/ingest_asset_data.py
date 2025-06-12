@@ -44,7 +44,7 @@ def fetch_asset_data(asset_client, page_size=100):
         )
         if not response or "Data" not in response:
             break
-        page_assets = response["Data"]
+        page_assets = response["Data"]["LIST"]
         assets_data.extend(page_assets)
         if total_assets is None:
             total_assets = response.get("TotalCount", len(page_assets))
@@ -98,16 +98,28 @@ def transform_asset_data(assets_data):
         )
 
         # cc_asset_alternative_ids
+        alt_ids_row = {
+            "asset_id": asset.get("ID"),
+            "created_at": to_mysql_datetime(current_ts),
+            "updated_at": to_mysql_datetime(current_ts),
+            "cmc_id": None,
+            "cg_id": None,
+            "isin_id": None,
+            "valor_id": None,
+            "dti_id": None,
+            "chain_id": None,
+        }
         for alt_id in asset.get("ASSET_ALTERNATIVE_IDS", []) or []:
-            asset_alt_ids_to_insert.append(
-                {
-                    "asset_id": asset.get("ID"),
-                    "id_source_name": alt_id.get("NAME"),
-                    "alternative_id_value": alt_id.get("ID"),
-                    "created_at": to_mysql_datetime(current_ts),
-                    "updated_at": to_mysql_datetime(current_ts),
-                }
-            )
+            source_name = alt_id.get("NAME")
+            id_value = alt_id.get("ID")
+            if source_name and id_value:
+                column_name = f"{source_name.lower()}_id"
+                if (
+                    column_name in alt_ids_row
+                ):  # Only add if the column exists in our schema
+                    alt_ids_row[column_name] = id_value
+        if alt_ids_row.get("asset_id"):
+            asset_alt_ids_to_insert.append(alt_ids_row)
 
         # cc_asset_industries_map
         for industry in asset.get("ASSET_INDUSTRIES", []) or []:
@@ -138,6 +150,7 @@ def transform_asset_data(assets_data):
                 {
                     "asset_id": asset.get("ID"),
                     "algorithm_name": algo_type.get("NAME"),
+                    "description": algo_type.get("DESCRIPTION"),
                     "created_at": to_mysql_datetime(current_ts),
                     "updated_at": to_mysql_datetime(current_ts),
                 }
@@ -184,9 +197,30 @@ def transform_asset_data(assets_data):
         asset_market_data_to_insert.append(
             {
                 "asset_id": asset.get("ID"),
-                "symbol": asset.get("SYMBOL"),
+                "snapshot_ts": to_mysql_datetime(snapshot_ts),
                 "price_usd": asset.get("PRICE_USD"),
-                "price_usd_last_update_ts": to_mysql_datetime(snapshot_ts),
+                "price_usd_source": asset.get("PRICE_USD_SOURCE"),
+                "mkt_cap_penalty": asset.get("MKT_CAP_PENALTY"),
+                "circulating_mkt_cap_usd": asset.get("CIRCULATING_MKT_CAP_USD"),
+                "total_mkt_cap_usd": asset.get("TOTAL_MKT_CAP_USD"),
+                "spot_moving_24_hour_quote_volume_top_tier_usd": asset.get(
+                    "SPOT_MOVING_24_HOUR_QUOTE_VOLUME_TOP_TIER_USD"
+                ),
+                "spot_moving_24_hour_quote_volume_usd": asset.get(
+                    "SPOT_MOVING_24_HOUR_QUOTE_VOLUME_USD"
+                ),
+                "spot_moving_7_day_quote_volume_top_tier_usd": asset.get(
+                    "SPOT_MOVING_7_DAY_QUOTE_VOLUME_TOP_TIER_USD"
+                ),
+                "spot_moving_7_day_quote_volume_usd": asset.get(
+                    "SPOT_MOVING_7_DAY_QUOTE_VOLUME_USD"
+                ),
+                "spot_moving_30_day_quote_volume_top_tier_usd": asset.get(
+                    "SPOT_MOVING_30_DAY_QUOTE_VOLUME_TOP_TIER_USD"
+                ),
+                "spot_moving_30_day_quote_volume_usd": asset.get(
+                    "SPOT_MOVING_30_DAY_QUOTE_VOLUME_USD"
+                ),
                 "created_at": to_mysql_datetime(current_ts),
                 "updated_at": to_mysql_datetime(current_ts),
             }
@@ -252,7 +286,7 @@ def deduplicate_all_tables(db_manager):
     deduplicate_table(
         db_manager,
         "market.cc_asset_alternative_ids",
-        ["asset_id", "id_source_name"],
+        ["asset_id"],  # Primary key is now just asset_id
         "updated_at",
     )
     deduplicate_table(
