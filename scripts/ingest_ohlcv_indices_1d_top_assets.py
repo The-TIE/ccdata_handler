@@ -10,6 +10,7 @@ from src.db.connection import DbConnectionManager
 from src.data_api.indices_ref_rates_api_client import CcdataIndicesRefRatesApiClient
 from src.data_api.asset_api_client import CcdataAssetApiClient
 from src.rate_limit_tracker import record_rate_limit_status
+from src.db.utils import deduplicate_table
 
 # Load environment variables from .env file
 load_dotenv()
@@ -254,6 +255,13 @@ def main():
             quote_currency,
         )
         time.sleep(0.1)  # Small delay to avoid hitting API rate limits too quickly
+
+    # Deduplicate the table after ingestion
+    logger.info("De-duplicating Spot Indices Table...")
+    table_name = "market.cc_ohlcv_spot_indices_1d_raw"
+    key_cols = ["datetime", "asset"]
+    latest_col = "collected_at"
+    deduplicate_table(db_connection, table_name, key_cols, latest_col)
 
     db_connection.close_connection()
     logger.info("Daily OHLCV indices data ingestion for top assets completed.")
