@@ -7,6 +7,7 @@ import time
 
 from src.logger_config import setup_logger
 from src.db.connection import DbConnectionManager
+from src.db.utils import deduplicate_table, to_mysql_datetime
 from src.data_api.spot_api_client import CcdataSpotApiClient
 from src.data_api.asset_api_client import CcdataAssetApiClient
 from src.min_api.general_info_api_client import MinApiGeneralInfoApiClient
@@ -25,98 +26,88 @@ log_file_path = os.path.join(
 logger = setup_logger(__name__, log_to_console=True, log_file_path=log_file_path)
 
 
-def get_top_assets(limit: int = 50) -> List[str]:
+def get_top_assets(db: DbConnectionManager, limit: int = 50) -> List[str]:
     """
-    Fetches the top assets by 30-day spot quote volume in USD.
+    Fetches the top assets by 30-day spot quote volume in USD from the database using a SQL script.
     Returns a list of asset symbols.
     """
-    asset_client = CcdataAssetApiClient()
-    logger.info(
-        f"Fetching top {limit} assets by SPOT_MOVING_30_DAY_QUOTE_VOLUME_USD..."
-    )
     try:
-        response = asset_client.get_top_list_general(
-            page_size=limit,
-            sort_by="SPOT_MOVING_30_DAY_QUOTE_VOLUME_USD",
-            toplist_quote_asset="USD",
-        )
-        if response and response.get("Data") and response["Data"].get("LIST"):
-            assets = [entry["SYMBOL"] for entry in response["Data"]["LIST"]]
-            logger.info(f"Found {len(assets)} top assets.")
+        query = db._load_sql("get_top_assets.sql")
+        logger.info(f"Fetching top {limit} assets by SPOT_MOVING_30_DAY_QUOTE_VOLUME_USD from database...")
+        # Pass limit as a parameter to the SQL query
+        results = db._execute_query(query, params=(limit,), fetch=True)
+        if results:
+            assets = [row[0] for row in results]
+            logger.info(f"Found {len(assets)} top assets in database.")
             return assets
         else:
-            logger.warning("No top assets found or API response was empty.")
+            logger.warning("No top assets found in database.")
             return []
+    except FileNotFoundError:
+        logger.error("SQL script 'get_top_assets.sql' not found.")
+        return []
     except Exception as e:
-        logger.error(f"Error fetching top assets: {e}")
+        logger.error(f"Error fetching top assets from database: {e}")
         return []
 
 
-def get_qualified_exchanges() -> List[str]:
+def get_qualified_exchanges_from_db(db: DbConnectionManager) -> List[str]:
     """
-    Fetches exchanges rated 'BB' or better.
-    Returns a list of exchange names.
+    Fetches exchanges rated 'BB' or better from the database using a SQL script.
+    Returns a list of exchange internal names.
     """
-    min_api_client = MinApiGeneralInfoApiClient()
-    logger.info("Fetching exchanges with 'BB' rating or better...")
     try:
-        response = min_api_client.get_exchanges_general_info()
-        if response and response.get("Data"):
-            qualified_exchanges = []
-            for exchange_id, details in response["Data"].items():
-                grade = details.get("Grade")
-                if grade in ["AAA", "AA", "A", "BBB", "BB"]:
-                    qualified_exchanges.append(details.get("InternalName"))
-            logger.info(f"Found {len(qualified_exchanges)} qualified exchanges.")
-            return qualified_exchanges
+        query = db._load_sql("get_qualified_exchanges.sql")
+        logger.info("Fetching qualified exchanges from database...")
+        results = db._execute_query(query, fetch=True)
+        if results:
+            exchanges = [row[0] for row in results]
+            logger.info(f"Found {len(exchanges)} qualified exchanges in database.")
+            return exchanges
         else:
-            logger.warning("No exchange general info found or API response was empty.")
+            logger.warning("No qualified exchanges found in database.")
             return []
+    except FileNotFoundError:
+        logger.error("SQL script 'get_qualified_exchanges.sql' not found.")
+        return []
     except Exception as e:
-        logger.error(f"Error fetching qualified exchanges: {e}")
+        logger.error(f"Error fetching qualified exchanges from database: {e}")
         return []
 
 
-def get_trading_pairs_for_assets_on_exchanges(
-    assets: List[str], exchanges: List[str]
+def get_trading_pairs_from_db(
+    db: DbConnectionManager, assets: List[str], exchanges: List[str]
 ) -> List[tuple]:
     """
-    Fetches all trading pairs for the given assets on the specified exchanges.
+    Fetches trading pairs for the given assets on the specified exchanges from the database using a SQL script.
     Returns a list of (exchange, base_symbol, quote_symbol) tuples.
     """
-    min_api_client = MinApiGeneralInfoApiClient()
-    all_pairs = set()
-    logger.info("Fetching all trading pairs for top assets on qualified exchanges...")
+    # Ensure the list of assets and exchanges is not empty for the query
+    if not assets or not exchanges:
+        logger.warning("Assets or exchanges list is empty, returning no trading pairs.")
+        return []
 
-    for exchange_name in exchanges:
-        logger.debug(f"Processing exchange: {exchange_name}")
-        try:
-            # The get_all_exchanges endpoint can filter by 'e' (exchange)
-            response = min_api_client.get_all_exchanges(e=exchange_name)
-            if response and response.get("Data") and response["Data"].get("exchanges"):
-                exchange_data = response["Data"]["exchanges"].get(exchange_name)
-                if exchange_data and exchange_data.get("pairs"):
-                    for base_symbol, pair_data in exchange_data["pairs"].items():
-                        if (
-                            base_symbol in assets
-                        ):  # Only consider pairs for our top assets
-                            for quote_symbol, _ in pair_data.get("tsyms", {}).items():
-                                all_pairs.add(
-                                    (exchange_name, base_symbol, quote_symbol)
-                                )
-                else:
-                    logger.warning(
-                        f"No pairs data found for exchange: {exchange_name}. Response: {response}"
-                    )
-            else:
-                logger.warning(
-                    f"No trading pairs found for exchange: {exchange_name}. Full response: {response}"
-                )
-        except Exception as e:
-            logger.error(f"Error fetching trading pairs for {exchange_name}: {e}")
+    try:
+        query = db._load_sql("get_trading_pairs.sql")
+        # Pass exchanges and assets as a tuple for the IN clauses
+        params = (exchanges, assets)
 
-    logger.info(f"Found {len(all_pairs)} unique trading pairs.")
-    return list(all_pairs)
+        logger.info("Fetching trading pairs for top assets on qualified exchanges from database...")
+        results = db._execute_query(query, params=params, fetch=True)
+        if results:
+            # Results are already in the desired (exchange, base_symbol, quote_symbol) format
+            trading_pairs = [(row[0], row[1], row[2]) for row in results]
+            logger.info(f"Found {len(trading_pairs)} trading pairs in database.")
+            return trading_pairs
+        else:
+            logger.warning("No trading pairs found in database for the given criteria.")
+            return []
+    except FileNotFoundError:
+        logger.error("SQL script 'get_trading_pairs.sql' not found.")
+        return []
+    except Exception as e:
+        logger.error(f"Error fetching trading pairs from database: {e}")
+        return []
 
 
 def get_last_ingested_datetime(
@@ -240,13 +231,13 @@ def ingest_daily_ohlcv_data_for_pair(
                             "high": entry.get("HIGH"),
                             "low": entry.get("LOW"),
                             "close": entry.get("CLOSE"),
-                            "first_trade_timestamp": entry.get("FIRST_TRADE_TIMESTAMP"),
-                            "last_trade_timestamp": entry.get("LAST_TRADE_TIMESTAMP"),
+                            "first_trade_timestamp": datetime.fromtimestamp(entry.get("FIRST_TRADE_TIMESTAMP"), tz=timezone.utc) if entry.get("FIRST_TRADE_TIMESTAMP") is not None else None, # Convert to DATETIME
+                            "last_trade_timestamp": datetime.fromtimestamp(entry.get("LAST_TRADE_TIMESTAMP"), tz=timezone.utc) if entry.get("LAST_TRADE_TIMESTAMP") is not None else None,   # Convert to DATETIME
                             "first_trade_price": entry.get("FIRST_TRADE_PRICE"),
                             "high_trade_price": entry.get("HIGH_TRADE_PRICE"),
-                            "high_trade_timestamp": entry.get("HIGH_TRADE_TIMESTAMP"),
+                            "high_trade_timestamp": datetime.fromtimestamp(entry.get("HIGH_TRADE_TIMESTAMP"), tz=timezone.utc) if entry.get("HIGH_TRADE_TIMESTAMP") is not None else None, # Convert to DATETIME
                             "low_trade_price": entry.get("LOW_TRADE_PRICE"),
-                            "low_trade_timestamp": entry.get("LOW_TRADE_TIMESTAMP"),
+                            "low_trade_timestamp": datetime.fromtimestamp(entry.get("LOW_TRADE_TIMESTAMP"), tz=timezone.utc) if entry.get("LOW_TRADE_TIMESTAMP") is not None else None,   # Convert to DATETIME
                             "last_trade_price": entry.get("LAST_TRADE_PRICE"),
                             "total_trades": entry.get("TOTAL_TRADES"),
                             "total_trades_buy": entry.get("TOTAL_TRADES_BUY"),
@@ -312,15 +303,17 @@ def main():
     db_connection = DbConnectionManager()
     spot_api_client = CcdataSpotApiClient()
 
-    top_assets = get_top_assets(limit=args.asset_limit)
+    # Pass db_connection to get_top_assets
+    top_assets = get_top_assets(db_connection, limit=args.asset_limit)
     if not top_assets:
-        logger.error("Failed to retrieve top assets. Aborting.")
+        logger.error("Failed to retrieve top assets from database. Aborting.")
         return
 
-    qualified_exchanges = get_qualified_exchanges()
-    logger.info(f"Qualified Exchanges: {qualified_exchanges}")
+    # Fetch qualified exchanges from the database
+    qualified_exchanges = get_qualified_exchanges_from_db(db_connection)
+    logger.info(f"Qualified Exchanges from DB: {qualified_exchanges}")
     if not qualified_exchanges:
-        logger.error("Failed to retrieve qualified exchanges. Aborting.")
+        logger.error("Failed to retrieve qualified exchanges from database. Aborting.")
         return
 
     # Apply exchange limit if specified
@@ -330,11 +323,12 @@ def main():
             f"Limiting ingestion to {len(qualified_exchanges)} exchanges for testing."
         )
 
-    trading_pairs = get_trading_pairs_for_assets_on_exchanges(
-        top_assets, qualified_exchanges
+    # Fetch trading pairs from the database
+    trading_pairs = get_trading_pairs_from_db(
+        db_connection, top_assets, qualified_exchanges
     )
     if not trading_pairs:
-        logger.error("No trading pairs found. Aborting.")
+        logger.error("No trading pairs found in database for the given criteria. Aborting.")
         return
 
     # Apply pair limit if specified
@@ -350,6 +344,12 @@ def main():
         )
         time.sleep(0.1)  # Small delay to avoid hitting API rate limits too quickly
 
+    # Add deduplication step after ingestion
+    table_name = "market.cc_ohlcv_spot_1d_raw"
+    key_cols = ["datetime", "exchange", "symbol_unmapped"]
+    latest_col = "collected_at"
+    deduplicate_table(db_connection, table_name, key_cols, latest_col)
+
     db_connection.close_connection()
     logger.info(
         "Daily OHLCV spot data ingestion for top assets on qualified exchanges completed."
@@ -359,5 +359,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    # top_exchanges = get_qualified_exchanges()
-    # print(top_exchanges)

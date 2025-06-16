@@ -8,6 +8,9 @@ env/
 venv/
 .env
 
+# Python Packages
+src/*.egg-info/
+
 # Logs
 logs/
 *.log

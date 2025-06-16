@@ -19,13 +19,13 @@ This table stores daily Open, High, Low, Close, and Volume (OHLCV) data for spot
 | `high`                | `DOUBLE`     | YES      | The highest price for the period.               |
 | `low`                 | `DOUBLE`     | YES      | The lowest price for the period.                |
 | `close`               | `DOUBLE`     | YES      | The closing price for the period.               |
-| `first_trade_timestamp`| `BIGINT`     | YES      | Unix timestamp of the first trade in the period.|
-| `last_trade_timestamp`| `BIGINT`     | YES      | Unix timestamp of the last trade in the period. |
+| `first_trade_timestamp`| `DATETIME`   | YES      | Timestamp of the first trade in the period.     |
+| `last_trade_timestamp`| `DATETIME`   | YES      | Timestamp of the last trade in the period.      |
 | `first_trade_price`   | `DOUBLE`     | YES      | Price of the first trade in the period.         |
 | `high_trade_price`    | `DOUBLE`     | YES      | Price of the highest trade in the period.       |
-| `high_trade_timestamp`| `BIGINT`     | YES      | Timestamp of the highest trade in the period.   |
+| `high_trade_timestamp`| `DATETIME`   | YES      | Timestamp of the highest trade in the period.   |
 | `low_trade_price`     | `DOUBLE`     | YES      | Price of the lowest trade in the period.        |
-| `low_trade_timestamp` | `BIGINT`     | YES      | Timestamp of the lowest trade in the period.    |
+| `low_trade_timestamp` | `DATETIME`   | YES      | Timestamp of the lowest trade in the period.    |
 | `last_trade_price`    | `DOUBLE`     | YES      | Price of the last trade in the period.          |
 | `total_trades`        | `BIGINT`     | YES      | Total number of trades in the period.           |
 | `total_trades_buy`    | `BIGINT`     | YES      | Total number of buy trades.                     |
