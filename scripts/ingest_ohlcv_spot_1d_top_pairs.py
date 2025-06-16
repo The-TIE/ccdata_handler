@@ -119,7 +119,7 @@ def get_last_ingested_datetime(
     query = f"""
         SELECT MAX(datetime)
         FROM market.cc_ohlcv_spot_1d_raw
-        WHERE exchange = %s AND symbol_unmapped = %s;
+        WHERE exchange = %s AND symbol = %s;
     """
     try:
         result = db._execute_query(
