@@ -374,3 +374,18 @@ This table stores information about the API rate limit status.
 
 **Shard Key:** (`timestamp`)
 **Sort Key:** (`timestamp`, `use_case`)
+
+## Table: `market.cc_asset_coin_uid_map`
+
+This table stores the mapping between project asset IDs and the canonical `coin_uid` from `production.coins`, along with the match type and score.
+
+| Column Name | Type | Nullable | Description |
+|-------------|------|----------|-------------|
+| `asset_id`  | `BIGINT` | NO | Foreign key to `market.cc_assets.asset_id`. |
+| `symbol`    | `VARCHAR(255)` | NO | Asset symbol from `market.cc_assets`. |
+| `coin_uid`  | `VARCHAR(256)` | NO | Canonical coin UID from `production.coins`. |
+| `match_type`| `VARCHAR(32)` | NO | Type of match (e.g., `coingecko_id`, `coinmarketcap_id`, `symbol`, `name`, `fuzzy_name`). |
+| `match_score`| `DOUBLE` | NO | Score for the match (1.0 for exact, <1.0 for fuzzy). |
+| `mapped_at` | `DATETIME` | NO | Timestamp when the mapping was created. |
+
+**Primary Key:** (`asset_id`)

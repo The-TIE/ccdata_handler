@@ -419,3 +419,13 @@ CREATE TABLE
         SHARD KEY (`timestamp`),
         SORT KEY (`timestamp`, `use_case`)
     );
+
+CREATE TABLE IF NOT EXISTS market.cc_asset_coin_uid_map (
+   asset_id BIGINT NOT NULL,
+   symbol VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+   coin_uid VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
+   match_type VARCHAR(32) NOT NULL,
+   match_score DOUBLE NOT NULL,
+   mapped_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   PRIMARY KEY (asset_id)
+);

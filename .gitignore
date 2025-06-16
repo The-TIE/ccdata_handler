@@ -11,6 +11,9 @@ venv/
 # Python Packages
 src/*.egg-info/
 
+# Python Version
+.python-version
+
 # Logs
 logs/
 *.log
@@ -33,3 +36,4 @@ references/data_api/ccdata_openapi_spec.json
 references/data_api/toplist_response.json
 references/data_api/spot_markets_instruments_response.json
 references/min_api/exchanges_general_response.json
+
