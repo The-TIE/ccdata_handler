@@ -90,6 +90,141 @@ class CcdataFuturesApiClient(CcdataBaseApiClient):
         if groups:
             params["groups"] = groups
         return self._get(endpoint, params=params)
+    
+    def get_futures_historical_ohlcv(
+            self,
+            interval: str,
+            market: str,
+            instrument: str,
+            groups: list = None,
+            limit: int = 30,
+            to_ts: int = None,
+            aggregate: int = 1,
+            response_format: str = "JSON",
+        ):
+            """
+            Fetches aggregated OHLCV candlestick data for a futures instrument.
+
+            Args:
+                interval (str): One of "days", "hours", or "minutes".
+                market (str): The exchange to obtain data from.
+                instrument (str): The mapped or unmapped instrument.
+                groups (list, optional): Filter by specific groups of interest.
+                limit (int, optional): Number of data points to return.
+                to_ts (int, optional): Return data up to and including this Unix timestamp.
+                aggregate (int, optional): Number of points to aggregate for each value.
+                response_format (str, optional): "JSON" or "CSV".
+
+            Returns:
+                dict: The API response containing OHLCV data.
+            """
+            endpoint = f"/futures/v1/historical/{interval}"
+            params = {
+                "market": market,
+                "instrument": instrument,
+                "limit": limit,
+                "aggregate": aggregate,
+                "response_format": response_format,
+            }
+            if groups:
+                params["groups"] = groups
+            if to_ts:
+                params["to_ts"] = to_ts
+            return self._get(endpoint, params=params)
+
+    def get_futures_historical_oi_ohlc(
+        self,
+        interval: str,
+        market: str,
+        instrument: str,
+        groups: list = None,
+        limit: int = 30,
+        to_ts: int = None,
+        aggregate: int = 1,
+        fill: bool = True,
+        apply_mapping: bool = True,
+        response_format: str = "JSON",
+    ):
+        """
+        Fetches aggregated OHLC open interest data for a futures instrument.
+
+        Args:
+            interval (str): One of "days", "hours", or "minutes".
+            market (str): The exchange to obtain data from.
+            instrument (str): The mapped or unmapped instrument.
+            groups (list, optional): Filter by specific groups of interest.
+            limit (int, optional): Number of data points to return.
+            to_ts (int, optional): Return data up to and including this Unix timestamp.
+            aggregate (int, optional): Number of points to aggregate for each value.
+            fill (bool, optional): If False, omit periods with no trading activity.
+            apply_mapping (bool, optional): Whether to apply internal instrument mappings.
+            response_format (str, optional): "JSON" or "CSV".
+
+        Returns:
+            dict: The API response containing OI OHLC data.
+        """
+        endpoint = f"/futures/v1/historical/oi/{interval}"
+        params = {
+            "market": market,
+            "instrument": instrument,
+            "limit": limit,
+            "aggregate": aggregate,
+            "fill": fill,
+            "apply_mapping": apply_mapping,
+            "response_format": response_format,
+        }
+        if groups:
+            params["groups"] = groups
+        if to_ts:
+            params["to_ts"] = to_ts
+        return self._get(endpoint, params=params)
+
+    def get_futures_historical_funding_rate_ohlc(
+        self,
+        interval: str,
+        market: str,
+        instrument: str,
+        groups: list = None,
+        limit: int = 30,
+        to_ts: int = None,
+        aggregate: int = 1,
+        fill: bool = True,
+        apply_mapping: bool = True,
+        response_format: str = "JSON",
+    ):
+        """
+        Fetches aggregated OHLC funding rate data for a futures instrument.
+
+        Args:
+            interval (str): One of "days", "hours", or "minutes".
+            market (str): The exchange to obtain data from.
+            instrument (str): The mapped or unmapped instrument.
+            groups (list, optional): Filter by specific groups of interest.
+            limit (int, optional): Number of data points to return.
+            to_ts (int, optional): Return data up to and including this Unix timestamp.
+            aggregate (int, optional): Number of points to aggregate for each value.
+            fill (bool, optional): If False, omit periods with no trading activity.
+            apply_mapping (bool, optional): Whether to apply internal instrument mappings.
+            response_format (str, optional): "JSON" or "CSV".
+
+        Returns:
+            dict: The API response containing funding rate OHLC data.
+        """
+        endpoint = f"/futures/v1/historical/funding-rate/{interval}"
+        params = {
+            "market": market,
+            "instrument": instrument,
+            "limit": limit,
+            "aggregate": aggregate,
+            "fill": fill,
+            "apply_mapping": apply_mapping,
+            "response_format": response_format,
+        }
+        if groups:
+            params["groups"] = groups
+        if to_ts:
+            params["to_ts"] = to_ts
+        return self._get(endpoint, params=params)
 
 
 if __name__ == "__main__":

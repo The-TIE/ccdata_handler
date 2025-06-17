@@ -463,3 +463,369 @@ This endpoint retrieves a comprehensive dictionary of mapped instruments across 
 }
 ```
 ---
+## `/futures/v1/historical/days`, `/futures/v1/historical/hours`, `/futures/v1/historical/minutes`
+
+**Description:**
+These endpoints provide aggregated candlestick (OHLCV) data for specific futures instruments across various exchanges, at daily, hourly, or minute intervals. They deliver essential trading data points such as open, high, low, close prices (OHLC), and volume, crucial for traders and analysts who need to understand detailed price movements and market behavior at different time granularities. The flexibility of these endpoints is highlighted by their support for multiple parameters that allow users to customize data retrieval based on market selection, instrument details, and desired aggregation levels. This makes them powerful tools for conducting granular historical analysis of futures markets.
+
+- `/futures/v1/historical/days`: Daily OHLCV data (max `limit`: 5000)
+- `/futures/v1/historical/hours`: Hourly OHLCV data (max `limit`: 2000)
+- `/futures/v1/historical/minutes`: Minute OHLCV data (max `limit`: 2000)
+
+**Parameters:**
+
+- `market` (query, string, required): The exchange to obtain data from.
+  Allowed values: binance, bit, bitfinex, bitget, bitmex, btcex, bullish, bybit, coinbase, coinbaseinternational, crosstower, cryptodotcom, deribit, dydxv4, ftx, gateio, huobipro, hyperliquid, kraken, kucoin, mock, okex
+  Example: `binance`
+  Schema: minLength: 2, maxLength: 30, type: string
+
+- `instrument` (query, string, required): A mapped and/or unmapped instrument to retrieve for a specific market (you can use either the instrument XXBTZUSD or mapped instrument (base - quote) BTC-USD on kraken as an example). The mapped version of the values is returned by default.
+  Example: `BTC-USDT-VANILLA-PERPETUAL`
+  Schema: minLength: 1, maxLength: 500, type: string
+
+- `groups` (query, array of strings, optional): When requesting historical entries you can filter by specific groups of interest. Pass the groups of interest into the URL as a comma separated list. If left empty, all data your account is allowed to access will be returned.
+  Allowed values: ID, MAPPING, MAPPING_ADVANCED, OHLC, OHLC_TRADE, TRADE, VOLUME
+  Example: `["ID", "MAPPING", "OHLC", "TRADE", "VOLUME"]`
+  Schema: type: array, default: []
+
+- `limit` (query, integer, optional): The number of data points to return.
+  Minimum: 1
+  Maximum:
+    - 5000 for `/days`
+    - 2000 for `/hours` and `/minutes`
+  Default: 30
+  Example: 30
+  Schema: type: integer
+
+- `to_ts` (query, integer, optional): Returns historical data up to and including this Unix timestamp. Used for pagination. The parameter must be in seconds since the epoch.
+  Schema: type: integer
+
+- `aggregate` (query, integer, optional): The number of points to aggregate for each returned value. For example, passing 5 will return data at 5 interval steps (days, hours, or minutes).
+  Minimum: 1, Maximum: 30, Default: 1
+  Example: 1
+  Schema: type: integer
+
+- `response_format` (query, string, optional): The format of the data response from the API.
+  Allowed values: JSON, CSV
+  Default: JSON
+  Schema: type: string
+
+**Example Response:**
+```json
+{
+    "Data": [
+        {
+            "UNIT": "HOUR",
+            "TIMESTAMP": 1750183200,
+            "TYPE": "914",
+            "MARKET": "binance",
+            "INSTRUMENT": "BTCUSDT",
+            "MAPPED_INSTRUMENT": "BTC-USDT-VANILLA-PERPETUAL",
+            "INDEX_UNDERLYING": "BTC",
+            "QUOTE_CURRENCY": "USDT",
+            "SETTLEMENT_CURRENCY": "USDT",
+            "CONTRACT_CURRENCY": "BTC",
+            "DENOMINATION_TYPE": "VANILLA",
+            "OPEN": 103750,
+            "HIGH": 104370.7,
+            "LOW": 103572,
+            "CLOSE": 104359.6,
+            "NUMBER_OF_CONTRACTS": 7328289,
+            "VOLUME": 7328.289,
+            "QUOTE_VOLUME": 762072954.3334,
+            "VOLUME_BUY": 3965.869,
+            "QUOTE_VOLUME_BUY": 412406894.5171,
+            "VOLUME_SELL": 3362.42,
+            "QUOTE_VOLUME_SELL": 349666059.8163,
+            "VOLUME_UNKNOWN": 0,
+            "QUOTE_VOLUME_UNKNOWN": 0,
+            "TOTAL_TRADES": 157958,
+            "TOTAL_TRADES_BUY": 82266,
+            "TOTAL_TRADES_SELL": 75692,
+            "TOTAL_TRADES_UNKNOWN": 0,
+            "FIRST_TRADE_TIMESTAMP": 1750183200,
+            "LAST_TRADE_TIMESTAMP": 1750186799,
+            "FIRST_TRADE_PRICE": 103750.1,
+            "HIGH_TRADE_PRICE": 104370.7,
+            "HIGH_TRADE_TIMESTAMP": 1750186750,
+            "LOW_TRADE_PRICE": 103572,
+            "LOW_TRADE_TIMESTAMP": 1750184896,
+            "LAST_TRADE_PRICE": 104359.6
+        },
+        {
+            "UNIT": "HOUR",
+            "TIMESTAMP": 1750186800,
+            "TYPE": "914",
+            "MARKET": "binance",
+            "INSTRUMENT": "BTCUSDT",
+            "MAPPED_INSTRUMENT": "BTC-USDT-VANILLA-PERPETUAL",
+            "INDEX_UNDERLYING": "BTC",
+            "QUOTE_CURRENCY": "USDT",
+            "SETTLEMENT_CURRENCY": "USDT",
+            "CONTRACT_CURRENCY": "BTC",
+            "DENOMINATION_TYPE": "VANILLA",
+            "OPEN": 104359.6,
+            "HIGH": 104750,
+            "LOW": 104358.6,
+            "CLOSE": 104673.2,
+            "NUMBER_OF_CONTRACTS": 2241452,
+            "VOLUME": 2241.452,
+            "QUOTE_VOLUME": 234392778.8179,
+            "VOLUME_BUY": 1420.016,
+            "QUOTE_VOLUME_BUY": 148483935.1682,
+            "VOLUME_SELL": 821.436,
+            "QUOTE_VOLUME_SELL": 85908843.6497,
+            "VOLUME_UNKNOWN": 0,
+            "QUOTE_VOLUME_UNKNOWN": 0,
+            "TOTAL_TRADES": 35466,
+            "TOTAL_TRADES_BUY": 19190,
+            "TOTAL_TRADES_SELL": 16276,
+            "TOTAL_TRADES_UNKNOWN": 0,
+            "FIRST_TRADE_TIMESTAMP": 1750186800,
+            "LAST_TRADE_TIMESTAMP": 1750187099,
+            "FIRST_TRADE_PRICE": 104359.5,
+            "HIGH_TRADE_PRICE": 104750,
+            "HIGH_TRADE_TIMESTAMP": 1750187058,
+            "LOW_TRADE_PRICE": 104358.6,
+            "LOW_TRADE_TIMESTAMP": 1750186803,
+            "LAST_TRADE_PRICE": 104673.2
+        }
+    ],
+    "Err": {}
+}
+```
+---
+## `/futures/v1/historical/funding-rate/days`, `/futures/v1/historical/funding-rate/hours`, `/futures/v1/historical/funding-rate/minutes`
+
+**Description:**  
+These endpoints provide aggregated candlestick (OHLC) data for funding rates associated with futures instruments on various exchanges, at daily, hourly, or minute intervals. They detail the open, high, low, and close prices (OHLC) of funding rate changes throughout the selected period, crucial for analyzing the dynamics of funding rate fluctuations over time. Funding rates, critical components of perpetual futures contracts, reflect the periodic payments exchanged between buyers and sellers, indicating market leverage and sentiment. Understanding these fluctuations is vital for traders and analysts focusing on the economic impacts of funding rates in the futures market.
+
+- `/futures/v1/historical/funding-rate/days`: Daily funding rate OHLC data (max `limit`: 5000)
+- `/futures/v1/historical/funding-rate/hours`: Hourly funding rate OHLC data (max `limit`: 2000)
+- `/futures/v1/historical/funding-rate/minutes`: Minute funding rate OHLC data (max `limit`: 2000)
+
+**Parameters:**
+
+- `market` (query, string, required): The exchange to obtain data from.  
+  Allowed values: binance, bit, bitfinex, bitget, bitmex, btcex, bullish, bybit, coinbase, coinbaseinternational, crosstower, cryptodotcom, deribit, dydxv4, ftx, gateio, huobipro, hyperliquid, kraken, kucoin, mock, okex  
+  Example: `bitmex`  
+  Schema: minLength: 2, maxLength: 30, type: string
+
+- `instrument` (query, string, required): A mapped and/or unmapped instrument to retrieve for a specific market (you can use either the instrument XXBTZUSD or mapped instrument (base - quote) BTC-USD on kraken as an example). The mapped version of the values is returned by default.  
+  Example: `BTC-USD-INVERSE-PERPETUAL`  
+  Schema: minLength: 1, maxLength: 500, type: string
+
+- `groups` (query, array of strings, optional): When requesting historical entries you can filter by specific groups of interest. Pass the groups of interest into the URL as a comma separated list. If left empty, all data your account is allowed to access will be returned.  
+  Allowed values: ID, MAPPING, MAPPING_ADVANCED, VALUE, OHLC, OHLC_MESSAGE, MESSAGE  
+  Example: `["ID", "MAPPING", "VALUE", "OHLC", "OHLC_MESSAGE", "MESSAGE"]`  
+  Schema: type: array, default: []
+
+- `limit` (query, integer, optional): The number of data points to return.  
+  Minimum: 1  
+  Maximum:  
+    - 5000 for `/days`  
+    - 2000 for `/hours` and `/minutes`  
+  Default: 30  
+  Example: 30  
+  Schema: type: integer
+
+- `to_ts` (query, integer, optional): Returns historical data up to and including this Unix timestamp. Used for pagination. The parameter must be in seconds since the epoch.  
+  Schema: type: integer
+
+- `aggregate` (query, integer, optional): The number of points to aggregate for each returned value. For example, passing 5 will return data at 5 interval steps (days, hours, or minutes).  
+  Minimum: 1, Maximum: 30, Default: 1  
+  Example: 1  
+  Schema: type: integer
+
+- `fill` (query, boolean, optional): If set to false or 0, data points for periods with no trading activity will not be returned.  
+  Default: true  
+  Example: true  
+  Schema: type: boolean
+
+- `apply_mapping` (query, boolean, optional): Determines if provided instrument values are converted according to internal mappings. When true, values are translated (e.g., coinbase 'USDT-USDC' becomes 'USDC-USDT' and values are inverted); when false, original values are used.  
+  Default: true  
+  Example: true  
+  Schema: type: boolean
+
+- `response_format` (query, string, optional): The format of the data response from the API.  
+  Allowed values: JSON, CSV  
+  Default: JSON  
+  Schema: type: string
+
+**Example Response:**  
+```json
+{
+    "Data": [
+        {
+            "UNIT": "DAY",
+            "TIMESTAMP": 1750032000,
+            "TYPE": "934",
+            "MARKET": "hyperliquid",
+            "INSTRUMENT": "BTC",
+            "MAPPED_INSTRUMENT": "BTC-USDT-QUANTO-PERPETUAL",
+            "INDEX_UNDERLYING": "BTC",
+            "QUOTE_CURRENCY": "USDT",
+            "SETTLEMENT_CURRENCY": "USDC",
+            "CONTRACT_CURRENCY": "BTC",
+            "DENOMINATION_TYPE": "QUANTO",
+            "INTERVAL_MS": 3600000,
+            "OPEN": 0.0000125,
+            "HIGH": 0.0000394887,
+            "LOW": 0.0000125,
+            "CLOSE": 0.0000125,
+            "TOTAL_FUNDING_RATE_UPDATES": 4979
+        },
+        {
+            "UNIT": "DAY",
+            "TIMESTAMP": 1750118400,
+            "TYPE": "934",
+            "MARKET": "hyperliquid",
+            "INSTRUMENT": "BTC",
+            "MAPPED_INSTRUMENT": "BTC-USDT-QUANTO-PERPETUAL",
+            "INDEX_UNDERLYING": "BTC",
+            "QUOTE_CURRENCY": "USDT",
+            "SETTLEMENT_CURRENCY": "USDC",
+            "CONTRACT_CURRENCY": "BTC",
+            "DENOMINATION_TYPE": "QUANTO",
+            "INTERVAL_MS": 3600000,
+            "OPEN": 0.0000125,
+            "HIGH": 0.0000155955,
+            "LOW": -0.0000121451,
+            "CLOSE": 0.0000125,
+            "TOTAL_FUNDING_RATE_UPDATES": 4129
+        }
+    ],
+    "Err": {}
+}
+```
+---
+## `/futures/v1/historical/oi/days`, `/futures/v1/historical/oi/hours`, `/futures/v1/historical/oi/minutes`
+
+**Description:**  
+These endpoints provide aggregated candlestick (OHLC) data specifically for open interest (OI) changes in futures instruments across various exchanges, at daily, hourly, or minute intervals. They detail the open, high, low, and close values (OHLC) of open interest fluctuations throughout the selected period, offering a precise measure of how open interest has evolved. This data is crucial for understanding the dynamics of contract engagement and liquidity without the direct influence of price movements, providing a clear picture of market participation and sentiment shifts. These endpoints are valuable tools for those needing to track and analyze changes in market depth and trader commitment at different time granularities.
+
+- `/futures/v1/historical/oi/days`: Daily OI OHLC data (max `limit`: 5000)
+- `/futures/v1/historical/oi/hours`: Hourly OI OHLC data (max `limit`: 2000)
+- `/futures/v1/historical/oi/minutes`: Minute OI OHLC data (max `limit`: 2000)
+
+**Parameters:**
+
+- `market` (query, string, required): The exchange to obtain data from.  
+  Allowed values: binance, bit, bitfinex, bitget, bitmex, btcex, bullish, bybit, coinbase, coinbaseinternational, crosstower, cryptodotcom, deribit, dydxv4, ftx, gateio, huobipro, hyperliquid, kraken, kucoin, mock, okex  
+  Example: `binance`  
+  Schema: minLength: 2, maxLength: 30, type: string
+
+- `instrument` (query, string, required): A mapped and/or unmapped instrument to retrieve for a specific market (you can use either the instrument XXBTZUSD or mapped instrument (base - quote) BTC-USD on kraken as an example). The mapped version of the values is returned by default.  
+  Example: `BTC-USDT-VANILLA-PERPETUAL`  
+  Schema: minLength: 1, maxLength: 500, type: string
+
+- `groups` (query, array of strings, optional): When requesting historical entries you can filter by specific groups of interest. Pass the groups of interest into the URL as a comma separated list. If left empty, all data your account is allowed to access will be returned.  
+  Allowed values: ID, MAPPING, MAPPING_ADVANCED, OHLC, OHLC_MESSAGE, MESSAGE  
+  Example: `["ID", "MAPPING", "OHLC", "OHLC_MESSAGE", "MESSAGE"]`  
+  Schema: type: array, default: []
+
+- `limit` (query, integer, optional): The number of data points to return.  
+  Minimum: 1  
+  Maximum:  
+    - 5000 for `/days`  
+    - 2000 for `/hours` and `/minutes`  
+  Default: 30  
+  Example: 30  
+  Schema: type: integer
+
+- `to_ts` (query, integer, optional): Returns historical data up to and including this Unix timestamp. Used for pagination. The parameter must be in seconds since the epoch.  
+  Schema: type: integer
+
+- `aggregate` (query, integer, optional): The number of points to aggregate for each returned value. For example, passing 5 will return data at 5 interval steps (days, hours, or minutes).  
+  Minimum: 1, Maximum: 30, Default: 1  
+  Example: 1  
+  Schema: type: integer
+
+- `fill` (query, boolean, optional): If set to false or 0, data points for periods with no trading activity will not be returned.  
+  Default: true  
+  Example: true  
+  Schema: type: boolean
+
+- `apply_mapping` (query, boolean, optional): Determines if provided instrument values are converted according to internal mappings. When true, values are translated (e.g., coinbase 'USDT-USDC' becomes 'USDC-USDT' and values are inverted); when false, original values are used.  
+  Default: true  
+  Example: true  
+  Schema: type: boolean
+
+- `response_format` (query, string, optional): The format of the data response from the API.  
+  Allowed values: JSON, CSV  
+  Default: JSON  
+  Schema: type: string
+
+**Example Response:**  
+```json
+{
+    "Data": [
+        {
+            "UNIT": "DAY",
+            "TIMESTAMP": 1750032000,
+            "TYPE": "944",
+            "MARKET": "binance",
+            "INSTRUMENT": "BTCUSDT",
+            "MAPPED_INSTRUMENT": "BTC-USDT-VANILLA-PERPETUAL",
+            "INDEX_UNDERLYING": "BTC",
+            "QUOTE_CURRENCY": "USDT",
+            "SETTLEMENT_CURRENCY": "USDT",
+            "CONTRACT_CURRENCY": "BTC",
+            "DENOMINATION_TYPE": "VANILLA",
+            "OPEN_SETTLEMENT": 78622.343,
+            "OPEN_MARK_PRICE": 105548.66893297,
+            "OPEN_QUOTE": 8298483652.04141,
+            "HIGH_SETTLEMENT": 81316.244,
+            "HIGH_SETTLEMENT_MARK_PRICE": 108715.7,
+            "HIGH_MARK_PRICE": 108882.5,
+            "HIGH_MARK_PRICE_SETTLEMENT": 79981.759,
+            "HIGH_QUOTE": 8841709615.28342,
+            "HIGH_QUOTE_MARK_PRICE": 108754.40341304,
+            "LOW_SETTLEMENT": 78013.262,
+            "LOW_SETTLEMENT_MARK_PRICE": 106745.4,
+            "LOW_MARK_PRICE": 104934.56897826,
+            "LOW_MARK_PRICE_SETTLEMENT": 78520.029,
+            "LOW_QUOTE": 8232358632.58052,
+            "LOW_QUOTE_MARK_PRICE": 104959.52212681,
+            "CLOSE_SETTLEMENT": 78013.262,
+            "CLOSE_MARK_PRICE": 106745.4,
+            "CLOSE_QUOTE": 8327556857.4948,
+            "TOTAL_OPEN_INTEREST_UPDATES": 8605
+        },
+        {
+            "UNIT": "DAY",
+            "TIMESTAMP": 1750118400,
+            "TYPE": "944",
+            "MARKET": "binance",
+            "INSTRUMENT": "BTCUSDT",
+            "MAPPED_INSTRUMENT": "BTC-USDT-VANILLA-PERPETUAL",
+            "INDEX_UNDERLYING": "BTC",
+            "QUOTE_CURRENCY": "USDT",
+            "SETTLEMENT_CURRENCY": "USDT",
+            "CONTRACT_CURRENCY": "BTC",
+            "DENOMINATION_TYPE": "VANILLA",
+            "OPEN_SETTLEMENT": 78013.262,
+            "OPEN_MARK_PRICE": 106745.4,
+            "OPEN_QUOTE": 8327556857.4948,
+            "HIGH_SETTLEMENT": 78960.327,
+            "HIGH_SETTLEMENT_MARK_PRICE": 104296.4,
+            "HIGH_MARK_PRICE": 107705.16677899,
+            "HIGH_MARK_PRICE_SETTLEMENT": 76368.345,
+            "HIGH_QUOTE": 8327556857.4948,
+            "HIGH_QUOTE_MARK_PRICE": 106745.4,
+            "LOW_SETTLEMENT": 76264.587,
+            "LOW_SETTLEMENT_MARK_PRICE": 107564.74338406,
+            "LOW_MARK_PRICE": 103328.70456159,
+            "LOW_MARK_PRICE_SETTLEMENT": 78335.079,
+            "LOW_QUOTE": 8044957700.0208,
+            "LOW_QUOTE_MARK_PRICE": 103592.7,
+            "CLOSE_SETTLEMENT": 78333.287,
+            "CLOSE_MARK_PRICE": 104804.1,
+            "CLOSE_QUOTE": 8209649644.0767,
+            "TOTAL_OPEN_INTEREST_UPDATES": 6882
+        }
+    ],
+    "Err": {}
+}
+```
+---

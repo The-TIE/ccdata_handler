@@ -459,3 +459,351 @@ This table stores the mapping between project asset IDs and the canonical `coin_
 | `mapped_at` | `DATETIME` | NO | Timestamp when the mapping was created. |
 
 **Primary Key:** (`asset_id`)
+
+## Table: `market.cc_futures_ohlcv_1d`
+
+This table stores daily Open, High, Low, Close, and Volume (OHLCV) data for futures instruments from CryptoCompare.
+
+| Column Name             | Type         | Nullable | Description                                                        |
+|-------------------------|--------------|----------|--------------------------------------------------------------------|
+| `datetime`              | `DATETIME`   | NO       | The timestamp of the OHLCV data (daily).                           |
+| `market`                | `VARCHAR(255)`| NO      | The exchange where the data originated.                            |
+| `instrument`            | `VARCHAR(255)`| NO      | The unmapped instrument symbol (e.g., `BTCUSDT`).                  |
+| `mapped_instrument`     | `VARCHAR(255)`| YES     | The mapped instrument symbol (e.g., `BTC-USD-VANILLA-PERPETUAL`).  |
+| `type`                  | `VARCHAR(255)`| YES     | The type of data.                                                  |
+| `index_underlying`      | `VARCHAR(255)`| YES     | The underlying index symbol.                                       |
+| `quote_currency`        | `VARCHAR(255)`| YES     | The quote asset symbol (e.g., `USD`).                              |
+| `settlement_currency`   | `VARCHAR(255)`| YES     | The settlement currency symbol.                                    |
+| `contract_currency`     | `VARCHAR(255)`| YES     | The contract currency symbol.                                      |
+| `denomination_type`     | `VARCHAR(255)`| YES     | The denomination type (e.g., `INVERSE`, `VANILLA`).                |
+| `open`                  | `DOUBLE`     | YES     | The opening price for the period.                                  |
+| `high`                  | `DOUBLE`     | YES     | The highest price for the period.                                  |
+| `low`                   | `DOUBLE`     | YES     | The lowest price for the period.                                   |
+| `close`                 | `DOUBLE`     | YES     | The closing price for the period.                                  |
+| `number_of_contracts`   | `BIGINT`     | YES     | Number of contracts traded in the period.                          |
+| `volume`                | `DOUBLE`     | YES     | Volume in base asset.                                              |
+| `quote_volume`          | `DOUBLE`     | YES     | Volume in quote asset.                                             |
+| `volume_buy`            | `DOUBLE`     | YES     | Buy volume in base asset.                                          |
+| `quote_volume_buy`      | `DOUBLE`     | YES     | Buy volume in quote asset.                                         |
+| `volume_sell`           | `DOUBLE`     | YES     | Sell volume in base asset.                                         |
+| `quote_volume_sell`     | `DOUBLE`     | YES     | Sell volume in quote asset.                                        |
+| `volume_unknown`        | `DOUBLE`     | YES     | Unknown volume in base asset.                                      |
+| `quote_volume_unknown`  | `DOUBLE`     | YES     | Unknown volume in quote asset.                                     |
+| `total_trades`          | `BIGINT`     | YES     | Total number of trades in the period.                              |
+| `total_trades_buy`      | `BIGINT`     | YES     | Total number of buy trades.                                        |
+| `total_trades_sell`     | `BIGINT`     | YES     | Total number of sell trades.                                       |
+| `total_trades_unknown`  | `BIGINT`     | YES     | Total number of unknown trades.                                    |
+| `first_trade_timestamp` | `DATETIME`   | YES     | Timestamp of the first trade in the period.                        |
+| `last_trade_timestamp`  | `DATETIME`   | YES     | Timestamp of the last trade in the period.                         |
+| `first_trade_price`     | `DOUBLE`     | YES     | Price of the first trade in the period.                            |
+| `high_trade_price`      | `DOUBLE`     | YES     | Price of the highest trade in the period.                          |
+| `high_trade_timestamp`  | `DATETIME`   | YES     | Timestamp of the highest trade in the period.                      |
+| `low_trade_price`       | `DOUBLE`     | YES     | Price of the lowest trade in the period.                           |
+| `low_trade_timestamp`   | `DATETIME`   | YES     | Timestamp of the lowest trade in the period.                       |
+| `last_trade_price`      | `DOUBLE`     | YES     | Price of the last trade in the period.                             |
+
+**Primary Key:** (`datetime`, `market`, `mapped_instrument`)  
+**Sort Key:** (`datetime`, `market`, `mapped_instrument`)
+
+---
+
+## Table: `market.cc_futures_ohlcv_1m`
+
+This table stores 1-minute Open, High, Low, Close, and Volume (OHLCV) data for futures instruments from CryptoCompare.
+
+| Column Name             | Type         | Nullable | Description                                                        |
+|-------------------------|--------------|----------|--------------------------------------------------------------------|
+| `datetime`              | `DATETIME`   | NO       | The timestamp of the OHLCV data (1-minute interval).               |
+| `market`                | `VARCHAR(255)`| NO      | The exchange where the data originated.                            |
+| `instrument`            | `VARCHAR(255)`| NO      | The unmapped instrument symbol (e.g., `BTCUSDT`).                  |
+| `mapped_instrument`     | `VARCHAR(255)`| YES     | The mapped instrument symbol (e.g., `BTC-USD-VANILLA-PERPETUAL`).  |
+| `type`                  | `VARCHAR(255)`| YES     | The type of data.                                                  |
+| `index_underlying`      | `VARCHAR(255)`| YES     | The underlying index symbol.                                       |
+| `quote_currency`        | `VARCHAR(255)`| YES     | The quote asset symbol (e.g., `USD`).                              |
+| `settlement_currency`   | `VARCHAR(255)`| YES     | The settlement currency symbol.                                    |
+| `contract_currency`     | `VARCHAR(255)`| YES     | The contract currency symbol.                                      |
+| `denomination_type`     | `VARCHAR(255)`| YES     | The denomination type (e.g., `INVERSE`, `VANILLA`).                |
+| `open`                  | `DOUBLE`     | YES     | The opening price for the period.                                  |
+| `high`                  | `DOUBLE`     | YES     | The highest price for the period.                                  |
+| `low`                   | `DOUBLE`     | YES     | The lowest price for the period.                                   |
+| `close`                 | `DOUBLE`     | YES     | The closing price for the period.                                  |
+| `number_of_contracts`   | `BIGINT`     | YES     | Number of contracts traded in the period.                          |
+| `volume`                | `DOUBLE`     | YES     | Volume in base asset.                                              |
+| `quote_volume`          | `DOUBLE`     | YES     | Volume in quote asset.                                             |
+| `volume_buy`            | `DOUBLE`     | YES     | Buy volume in base asset.                                          |
+| `quote_volume_buy`      | `DOUBLE`     | YES     | Buy volume in quote asset.                                         |
+| `volume_sell`           | `DOUBLE`     | YES     | Sell volume in base asset.                                         |
+| `quote_volume_sell`     | `DOUBLE`     | YES     | Sell volume in quote asset.                                        |
+| `volume_unknown`        | `DOUBLE`     | YES     | Unknown volume in base asset.                                      |
+| `quote_volume_unknown`  | `DOUBLE`     | YES     | Unknown volume in quote asset.                                     |
+| `total_trades`          | `BIGINT`     | YES     | Total number of trades in the period.                              |
+| `total_trades_buy`      | `BIGINT`     | YES     | Total number of buy trades.                                        |
+| `total_trades_sell`     | `BIGINT`     | YES     | Total number of sell trades.                                       |
+| `total_trades_unknown`  | `BIGINT`     | YES     | Total number of unknown trades.                                    |
+| `first_trade_timestamp` | `DATETIME`   | YES     | Timestamp of the first trade in the period.                        |
+| `last_trade_timestamp`  | `DATETIME`   | YES     | Timestamp of the last trade in the period.                         |
+| `first_trade_price`     | `DOUBLE`     | YES     | Price of the first trade in the period.                            |
+| `high_trade_price`      | `DOUBLE`     | YES     | Price of the highest trade in the period.                          |
+| `high_trade_timestamp`  | `DATETIME`   | YES     | Timestamp of the highest trade in the period.                      |
+| `low_trade_price`       | `DOUBLE`     | YES     | Price of the lowest trade in the period.                           |
+| `low_trade_timestamp`   | `DATETIME`   | YES     | Timestamp of the lowest trade in the period.                       |
+| `last_trade_price`      | `DOUBLE`     | YES     | Price of the last trade in the period.                             |
+
+**Primary Key:** (`datetime`, `market`, `mapped_instrument`)
+**Sort Key:** (`datetime`, `market`, `mapped_instrument`)
+
+---
+
+## Table: `market.cc_futures_ohlcv_1h`
+
+This table stores 1-hour Open, High, Low, Close, and Volume (OHLCV) data for futures instruments from CryptoCompare.
+
+| Column Name             | Type         | Nullable | Description                                                        |
+|-------------------------|--------------|----------|--------------------------------------------------------------------|
+| `datetime`              | `DATETIME`   | NO       | The timestamp of the OHLCV data (1-hour interval).                 |
+| `market`                | `VARCHAR(255)`| NO      | The exchange where the data originated.                            |
+| `instrument`            | `VARCHAR(255)`| NO      | The unmapped instrument symbol (e.g., `BTCUSDT`).                  |
+| `mapped_instrument`     | `VARCHAR(255)`| YES     | The mapped instrument symbol (e.g., `BTC-USD-VANILLA-PERPETUAL`).  |
+| `type`                  | `VARCHAR(255)`| YES     | The type of data.                                                  |
+| `index_underlying`      | `VARCHAR(255)`| YES     | The underlying index symbol.                                       |
+| `quote_currency`        | `VARCHAR(255)`| YES     | The quote asset symbol (e.g., `USD`).                              |
+| `settlement_currency`   | `VARCHAR(255)`| YES     | The settlement currency symbol.                                    |
+| `contract_currency`     | `VARCHAR(255)`| YES     | The contract currency symbol.                                      |
+| `denomination_type`     | `VARCHAR(255)`| YES     | The denomination type (e.g., `INVERSE`, `VANILLA`).                |
+| `open`                  | `DOUBLE`     | YES     | The opening price for the period.                                  |
+| `high`                  | `DOUBLE`     | YES     | The highest price for the period.                                  |
+| `low`                   | `DOUBLE`     | YES     | The lowest price for the period.                                   |
+| `close`                 | `DOUBLE`     | YES     | The closing price for the period.                                  |
+| `number_of_contracts`   | `BIGINT`     | YES     | Number of contracts traded in the period.                          |
+| `volume`                | `DOUBLE`     | YES     | Volume in base asset.                                              |
+| `quote_volume`          | `DOUBLE`     | YES     | Volume in quote asset.                                             |
+| `volume_buy`            | `DOUBLE`     | YES     | Buy volume in base asset.                                          |
+| `quote_volume_buy`      | `DOUBLE`     | YES     | Buy volume in quote asset.                                         |
+| `volume_sell`           | `DOUBLE`     | YES     | Sell volume in base asset.                                         |
+| `quote_volume_sell`     | `DOUBLE`     | YES     | Sell volume in quote asset.                                        |
+| `volume_unknown`        | `DOUBLE`     | YES     | Unknown volume in base asset.                                      |
+| `quote_volume_unknown`  | `DOUBLE`     | YES     | Unknown volume in quote asset.                                     |
+| `total_trades`          | `BIGINT`     | YES     | Total number of trades in the period.                              |
+| `total_trades_buy`      | `BIGINT`     | YES     | Total number of buy trades.                                        |
+| `total_trades_sell`     | `BIGINT`     | YES     | Total number of sell trades.                                       |
+| `total_trades_unknown`  | `BIGINT`     | YES     | Total number of unknown trades.                                    |
+| `first_trade_timestamp` | `DATETIME`   | YES     | Timestamp of the first trade in the period.                        |
+| `last_trade_timestamp`  | `DATETIME`   | YES     | Timestamp of the last trade in the period.                         |
+| `first_trade_price`     | `DOUBLE`     | YES     | Price of the first trade in the period.                            |
+| `high_trade_price`      | `DOUBLE`     | YES     | Price of the highest trade in the period.                          |
+| `high_trade_timestamp`  | `DATETIME`   | YES     | Timestamp of the highest trade in the period.                      |
+| `low_trade_price`       | `DOUBLE`     | YES     | Price of the lowest trade in the period.                           |
+| `low_trade_timestamp`   | `DATETIME`   | YES     | Timestamp of the lowest trade in the period.                       |
+| `last_trade_price`      | `DOUBLE`     | YES     | Price of the last trade in the period.                             |
+
+**Primary Key:** (`datetime`, `market`, `mapped_instrument`)
+**Sort Key:** (`datetime`, `market`, `mapped_instrument`)
+
+---
+
+## Table: `market.cc_futures_open_interest_ohlc_1m`
+
+This table stores 1-minute Open, High, Low, Close (OHLC) data for futures open interest from CryptoCompare.
+
+| Column Name                 | Type         | Nullable | Description                                                        |
+|-----------------------------|--------------|----------|--------------------------------------------------------------------|
+| `datetime`                  | `DATETIME`   | NO       | The timestamp of the OHLC data (1-minute interval).                |
+| `market`                    | `VARCHAR(255)`| NO      | The exchange where the data originated.                            |
+| `instrument`                | `VARCHAR(255)`| NO      | The unmapped instrument symbol (e.g., `BTCUSDT`).                  |
+| `mapped_instrument`         | `VARCHAR(255)`| YES     | The mapped instrument symbol (e.g., `BTC-USD-VANILLA-PERPETUAL`).  |
+| `type`                      | `VARCHAR(255)`| YES     | The type of data.                                                  |
+| `index_underlying`          | `VARCHAR(255)`| YES     | The underlying index symbol.                                       |
+| `quote_currency`            | `VARCHAR(255)`| YES     | The quote asset symbol (e.g., `USD`).                              |
+| `settlement_currency`       | `VARCHAR(255)`| YES     | The settlement currency symbol.                                    |
+| `contract_currency`         | `VARCHAR(255)`| YES     | The contract currency symbol.                                      |
+| `denomination_type`         | `VARCHAR(255)`| YES     | The denomination type (e.g., `INVERSE`, `VANILLA`).                |
+| `open_oi_contracts`         | `DOUBLE`     | YES     | The opening open interest in contracts for the period.             |
+| `high_oi_contracts`         | `DOUBLE`     | YES     | The highest open interest in contracts for the period.             |
+| `low_oi_contracts`          | `DOUBLE`     | YES     | The lowest open interest in contracts for the period.              |
+| `close_oi_contracts`        | `DOUBLE`     | YES     | The closing open interest in contracts for the period.             |
+| `open_oi_quote`             | `DOUBLE`     | YES     | The opening open interest in quote currency for the period.        |
+| `high_oi_quote`             | `DOUBLE`     | YES     | The highest open interest in quote currency for the period.        |
+| `low_oi_quote`              | `DOUBLE`     | YES     | The lowest open interest in quote currency for the period.         |
+| `close_oi_quote`            | `DOUBLE`     | YES     | The closing open interest in quote currency for the period.        |
+| `open_mark_price`           | `DOUBLE`     | YES     | The opening mark price for the period.                             |
+| `high_oi_mark_price`        | `DOUBLE`     | YES     | The mark price at the highest open interest for the period.        |
+| `high_mark_price`           | `DOUBLE`     | YES     | The highest mark price for the period.                             |
+| `high_mark_price_oi`        | `DOUBLE`     | YES     | The open interest at the highest mark price for the period.        |
+| `high_quote_mark_price`     | `DOUBLE`     | YES     | The quote mark price at the highest open interest for the period.  |
+| `low_oi_mark_price`         | `DOUBLE`     | YES     | The mark price at the lowest open interest for the period.         |
+| `low_mark_price`            | `DOUBLE`     | YES     | The lowest mark price for the period.                              |
+| `low_mark_price_oi`         | `DOUBLE`     | YES     | The open interest at the lowest mark price for the period.         |
+| `low_quote_mark_price`      | `DOUBLE`     | YES     | The quote mark price at the lowest open interest for the period.   |
+| `close_mark_price`          | `DOUBLE`     | YES     | The closing mark price for the period.                             |
+| `total_open_interest_updates`| `BIGINT`    | YES     | Total number of open interest updates in the period.               |
+
+**Primary Key:** (`datetime`, `market`, `mapped_instrument`)
+**Sort Key:** (`datetime`, `market`, `mapped_instrument`)
+
+---
+
+## Table: `market.cc_futures_open_interest_ohlc_1h`
+
+This table stores 1-hour Open, High, Low, Close (OHLC) data for futures open interest from CryptoCompare.
+
+| Column Name                 | Type         | Nullable | Description                                                        |
+|-----------------------------|--------------|----------|--------------------------------------------------------------------|
+| `datetime`                  | `DATETIME`   | NO       | The timestamp of the OHLC data (1-hour interval).                  |
+| `market`                    | `VARCHAR(255)`| NO      | The exchange where the data originated.                            |
+| `instrument`                | `VARCHAR(255)`| NO      | The unmapped instrument symbol (e.g., `BTCUSDT`).                  |
+| `mapped_instrument`         | `VARCHAR(255)`| YES     | The mapped instrument symbol (e.g., `BTC-USD-VANILLA-PERPETUAL`).  |
+| `type`                      | `VARCHAR(255)`| YES     | The type of data.                                                  |
+| `index_underlying`          | `VARCHAR(255)`| YES     | The underlying index symbol.                                       |
+| `quote_currency`            | `VARCHAR(255)`| YES     | The quote asset symbol (e.g., `USD`).                              |
+| `settlement_currency`       | `VARCHAR(255)`| YES     | The settlement currency symbol.                                    |
+| `contract_currency`         | `VARCHAR(255)`| YES     | The contract currency symbol.                                      |
+| `denomination_type`         | `VARCHAR(255)`| YES     | The denomination type (e.g., `INVERSE`, `VANILLA`).                |
+| `open_oi_contracts`         | `DOUBLE`     | YES     | The opening open interest in contracts for the period.             |
+| `high_oi_contracts`         | `DOUBLE`     | YES     | The highest open interest in contracts for the period.             |
+| `low_oi_contracts`          | `DOUBLE`     | YES     | The lowest open interest in contracts for the period.              |
+| `close_oi_contracts`        | `DOUBLE`     | YES     | The closing open interest in contracts for the period.             |
+| `open_oi_quote`             | `DOUBLE`     | YES     | The opening open interest in quote currency for the period.        |
+| `high_oi_quote`             | `DOUBLE`     | YES     | The highest open interest in quote currency for the period.        |
+| `low_oi_quote`              | `DOUBLE`     | YES     | The lowest open interest in quote currency for the period.         |
+| `close_oi_quote`            | `DOUBLE`     | YES     | The closing open interest in quote currency for the period.        |
+| `open_mark_price`           | `DOUBLE`     | YES     | The opening mark price for the period.                             |
+| `high_oi_mark_price`        | `DOUBLE`     | YES     | The mark price at the highest open interest for the period.        |
+| `high_mark_price`           | `DOUBLE`     | YES     | The highest mark price for the period.                             |
+| `high_mark_price_oi`        | `DOUBLE`     | YES     | The open interest at the highest mark price for the period.        |
+| `high_quote_mark_price`     | `DOUBLE`     | YES     | The quote mark price at the highest open interest for the period.  |
+| `low_oi_mark_price`         | `DOUBLE`     | YES     | The mark price at the lowest open interest for the period.         |
+| `low_mark_price`            | `DOUBLE`     | YES     | The lowest mark price for the period.                              |
+| `low_mark_price_oi`         | `DOUBLE`     | YES     | The open interest at the lowest mark price for the period.         |
+| `low_quote_mark_price`      | `DOUBLE`     | YES     | The quote mark price at the lowest open interest for the period.   |
+| `close_mark_price`          | `DOUBLE`     | YES     | The closing mark price for the period.                             |
+| `total_open_interest_updates`| `BIGINT`    | YES     | Total number of open interest updates in the period.               |
+
+**Primary Key:** (`datetime`, `market`, `mapped_instrument`)
+**Sort Key:** (`datetime`, `market`, `mapped_instrument`)
+
+---
+
+## Table: `market.cc_futures_open_interest_ohlc_1d`
+
+This table stores daily Open, High, Low, Close (OHLC) data for futures open interest from CryptoCompare.
+
+| Column Name                 | Type         | Nullable | Description                                                        |
+|-----------------------------|--------------|----------|--------------------------------------------------------------------|
+| `datetime`                  | `DATETIME`   | NO       | The timestamp of the OHLC data (daily).                            |
+| `market`                    | `VARCHAR(255)`| NO      | The exchange where the data originated.                            |
+| `instrument`                | `VARCHAR(255)`| NO      | The unmapped instrument symbol (e.g., `BTCUSDT`).                  |
+| `mapped_instrument`         | `VARCHAR(255)`| YES     | The mapped instrument symbol (e.g., `BTC-USD-VANILLA-PERPETUAL`).  |
+| `type`                      | `VARCHAR(255)`| YES     | The type of data.                                                  |
+| `index_underlying`          | `VARCHAR(255)`| YES     | The underlying index symbol.                                       |
+| `quote_currency`            | `VARCHAR(255)`| YES     | The quote asset symbol (e.g., `USD`).                              |
+| `settlement_currency`       | `VARCHAR(255)`| YES     | The settlement currency symbol.                                    |
+| `contract_currency`         | `VARCHAR(255)`| YES     | The contract currency symbol.                                      |
+| `denomination_type`         | `VARCHAR(255)`| YES     | The denomination type (e.g., `INVERSE`, `VANILLA`).                |
+| `open_oi_contracts`         | `DOUBLE`     | YES     | The opening open interest in contracts for the period.             |
+| `high_oi_contracts`         | `DOUBLE`     | YES     | The highest open interest in contracts for the period.             |
+| `low_oi_contracts`          | `DOUBLE`     | YES     | The lowest open interest in contracts for the period.              |
+| `close_oi_contracts`        | `DOUBLE`     | YES     | The closing open interest in contracts for the period.             |
+| `open_oi_quote`             | `DOUBLE`     | YES     | The opening open interest in quote currency for the period.        |
+| `high_oi_quote`             | `DOUBLE`     | YES     | The highest open interest in quote currency for the period.        |
+| `low_oi_quote`              | `DOUBLE`     | YES     | The lowest open interest in quote currency for the period.         |
+| `close_oi_quote`            | `DOUBLE`     | YES     | The closing open interest in quote currency for the period.        |
+| `open_mark_price`           | `DOUBLE`     | YES     | The opening mark price for the period.                             |
+| `high_oi_mark_price`        | `DOUBLE`     | YES     | The mark price at the highest open interest for the period.        |
+| `high_mark_price`           | `DOUBLE`     | YES     | The highest mark price for the period.                             |
+| `high_mark_price_oi`        | `DOUBLE`     | YES     | The open interest at the highest mark price for the period.        |
+| `high_quote_mark_price`     | `DOUBLE`     | YES     | The quote mark price at the highest open interest for the period.  |
+| `low_oi_mark_price`         | `DOUBLE`     | YES     | The mark price at the lowest open interest for the period.         |
+| `low_mark_price`            | `DOUBLE`     | YES     | The lowest mark price for the period.                              |
+| `low_mark_price_oi`         | `DOUBLE`     | YES     | The open interest at the lowest mark price for the period.         |
+| `low_quote_mark_price`      | `DOUBLE`     | YES     | The quote mark price at the lowest open interest for the period.   |
+| `close_mark_price`          | `DOUBLE`     | YES     | The closing mark price for the period.                             |
+| `total_open_interest_updates`| `BIGINT`    | YES     | Total number of open interest updates in the period.               |
+
+**Primary Key:** (`datetime`, `market`, `mapped_instrument`)
+**Sort Key:** (`datetime`, `market`, `mapped_instrument`)
+
+---
+
+## Table: `market.cc_futures_funding_rate_ohlc_1m`
+
+This table stores 1-minute Open, High, Low, Close (OHLC) data for futures funding rates from CryptoCompare.
+
+| Column Name                 | Type         | Nullable | Description                                                        |
+|-----------------------------|--------------|----------|--------------------------------------------------------------------|
+| `datetime`                  | `DATETIME`   | NO       | The timestamp of the OHLC data (1-minute interval).                |
+| `market`                    | `VARCHAR(255)`| NO      | The exchange where the data originated.                            |
+| `instrument`                | `VARCHAR(255)`| NO      | The unmapped instrument symbol (e.g., `BTCUSDT`).                  |
+| `mapped_instrument`         | `VARCHAR(255)`| YES     | The mapped instrument symbol (e.g., `BTC-USD-VANILLA-PERPETUAL`).  |
+| `type`                      | `VARCHAR(255)`| YES     | The type of data.                                                  |
+| `index_underlying`          | `VARCHAR(255)`| YES     | The underlying index symbol.                                       |
+| `quote_currency`            | `VARCHAR(255)`| YES     | The quote asset symbol (e.g., `USD`).                              |
+| `settlement_currency`       | `VARCHAR(255)`| YES     | The settlement currency symbol.                                    |
+| `contract_currency`         | `VARCHAR(255)`| YES     | The contract currency symbol.                                      |
+| `denomination_type`         | `VARCHAR(255)`| YES     | The denomination type (e.g., `INVERSE`, `VANILLA`).                |
+| `interval_ms`               | `BIGINT`     | YES     | The interval in milliseconds for the funding rate.                 |
+| `open_fr`                   | `DOUBLE`     | YES     | The opening funding rate for the period.                           |
+| `high_fr`                   | `DOUBLE`     | YES     | The highest funding rate for the period.                           |
+| `low_fr`                    | `DOUBLE`     | YES     | The lowest funding rate for the period.                            |
+| `close_fr`                  | `DOUBLE`     | YES     | The closing funding rate for the period.                           |
+| `total_funding_rate_updates`| `BIGINT`     | YES     | Total number of funding rate updates in the period.                |
+
+**Primary Key:** (`datetime`, `market`, `mapped_instrument`)
+**Sort Key:** (`datetime`, `market`, `mapped_instrument`)
+
+---
+
+## Table: `market.cc_futures_funding_rate_ohlc_1h`
+
+This table stores 1-hour Open, High, Low, Close (OHLC) data for futures funding rates from CryptoCompare.
+
+| Column Name                 | Type         | Nullable | Description                                                        |
+|-----------------------------|--------------|----------|--------------------------------------------------------------------|
+| `datetime`                  | `DATETIME`   | NO       | The timestamp of the OHLC data (1-hour interval).                  |
+| `market`                    | `VARCHAR(255)`| NO      | The exchange where the data originated.                            |
+| `instrument`                | `VARCHAR(255)`| NO      | The unmapped instrument symbol (e.g., `BTCUSDT`).                  |
+| `mapped_instrument`         | `VARCHAR(255)`| YES     | The mapped instrument symbol (e.g., `BTC-USD-VANILLA-PERPETUAL`).  |
+| `type`                      | `VARCHAR(255)`| YES     | The type of data.                                                  |
+| `index_underlying`          | `VARCHAR(255)`| YES     | The underlying index symbol.                                       |
+| `quote_currency`            | `VARCHAR(255)`| YES     | The quote asset symbol (e.g., `USD`).                              |
+| `settlement_currency`       | `VARCHAR(255)`| YES     | The settlement currency symbol.                                    |
+| `contract_currency`         | `VARCHAR(255)`| YES     | The contract currency symbol.                                      |
+| `denomination_type`         | `VARCHAR(255)`| YES     | The denomination type (e.g., `INVERSE`, `VANILLA`).                |
+| `interval_ms`               | `BIGINT`     | YES     | The interval in milliseconds for the funding rate.                 |
+| `open_fr`                   | `DOUBLE`     | YES     | The opening funding rate for the period.                           |
+| `high_fr`                   | `DOUBLE`     | YES     | The highest funding rate for the period.                           |
+| `low_fr`                    | `DOUBLE`     | YES     | The lowest funding rate for the period.                            |
+| `close_fr`                  | `DOUBLE`     | YES     | The closing funding rate for the period.                           |
+| `total_funding_rate_updates`| `BIGINT`     | YES     | Total number of funding rate updates in the period.                |
+
+**Primary Key:** (`datetime`, `market`, `mapped_instrument`)
+**Sort Key:** (`datetime`, `market`, `mapped_instrument`)
+
+---
+
+## Table: `market.cc_futures_funding_rate_ohlc_1d`
+
+This table stores daily Open, High, Low, Close (OHLC) data for futures funding rates from CryptoCompare.
+
+| Column Name                 | Type         | Nullable | Description                                                        |
+|-----------------------------|--------------|----------|--------------------------------------------------------------------|
+| `datetime`                  | `DATETIME`   | NO       | The timestamp of the OHLC data (daily).                            |
+| `market`                    | `VARCHAR(255)`| NO      | The exchange where the data originated.                            |
+| `instrument`                | `VARCHAR(255)`| NO      | The unmapped instrument symbol (e.g., `BTCUSDT`).                  |
+| `mapped_instrument`         | `VARCHAR(255)`| YES     | The mapped instrument symbol (e.g., `BTC-USD-VANILLA-PERPETUAL`).  |
+| `type`                      | `VARCHAR(255)`| YES     | The type of data.                                                  |
+| `index_underlying`          | `VARCHAR(255)`| YES     | The underlying index symbol.                                       |
+| `quote_currency`            | `VARCHAR(255)`| YES     | The quote asset symbol (e.g., `USD`).                              |
+| `settlement_currency`       | `VARCHAR(255)`| YES     | The settlement currency symbol.                                    |
+| `contract_currency`         | `VARCHAR(255)`| YES     | The contract currency symbol.                                      |
+| `denomination_type`         | `VARCHAR(255)`| YES     | The denomination type (e.g., `INVERSE`, `VANILLA`).                |
+| `interval_ms`               | `BIGINT`     | YES     | The interval in milliseconds for the funding rate.                 |
+| `open_fr`                   | `DOUBLE`     | YES     | The opening funding rate for the period.                           |
+| `high_fr`                   | `DOUBLE`     | YES     | The highest funding rate for the period.                           |
+| `low_fr`                    | `DOUBLE`     | YES     | The lowest funding rate for the period.                            |
+| `close_fr`                  | `DOUBLE`     | YES     | The closing funding rate for the period.                           |
+| `total_funding_rate_updates`| `BIGINT`     | YES     | Total number of funding rate updates in the period.                |
+
+**Primary Key:** (`datetime`, `market`, `mapped_instrument`)
+**Sort Key:** (`datetime`, `market`, `mapped_instrument`)
+
+---
