@@ -420,6 +420,106 @@ CREATE TABLE
         SORT KEY (`timestamp`, `use_case`)
     );
 
+CREATE TABLE
+    IF NOT EXISTS `market`.`cc_exchanges_futures_details` (
+        `exchange_internal_name` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+            `api_exchange_type` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `exchange_status` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `mapped_instruments_total` INT,
+            `unmapped_instruments_total` INT,
+            `instruments_active_count` INT,
+            `instruments_ignored_count` INT,
+            `instruments_retired_count` INT,
+            `instruments_expired_count` INT,
+            `instruments_retired_unmapped_count` INT,
+            `total_trades_exchange_level` BIGINT,
+            `total_open_interest_updates` BIGINT,
+            `total_funding_rate_updates` BIGINT,
+            `has_orderbook_l2_snapshots` BOOLEAN,
+            `api_data_retrieved_datetime` DATETIME,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            SHARD KEY (`exchange_internal_name`),
+            SORT KEY (`exchange_internal_name`)
+    );
+
+DROP TABLE IF EXISTS `market`.`cc_instruments_futures`;
+CREATE TABLE
+    `market`.`cc_instruments_futures` (
+        `exchange_internal_name` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+            `mapped_instrument_symbol` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+            `api_instrument_type` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `instrument_status_on_exchange` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `exchange_instrument_symbol_raw` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `index_underlying_symbol` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `index_underlying_id` BIGINT,
+            `quote_currency_symbol` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `quote_currency_id` BIGINT,
+            `settlement_currency_symbol` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `settlement_currency_id` BIGINT,
+            `contract_currency_symbol` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `contract_currency_id` BIGINT,
+            `denomination_type` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `transform_function` VARCHAR(255) CHARACTER
+        SET
+            utf8mb4 COLLATE utf8mb4_general_ci,
+            `instrument_mapping_created_datetime` DATETIME,
+            `has_trades` BOOLEAN,
+            `first_trade_datetime` DATETIME,
+            `last_trade_datetime` DATETIME,
+            `total_trades_instrument_level` BIGINT,
+            `has_funding_rate_updates` BOOLEAN,
+            `first_funding_rate_update_datetime` DATETIME,
+            `last_funding_rate_update_datetime` DATETIME,
+            `total_funding_rate_updates` BIGINT,
+            `has_open_interest_updates` BOOLEAN,
+            `first_open_interest_update_datetime` DATETIME,
+            `last_open_interest_update_datetime` DATETIME,
+            `total_open_interest_updates` BIGINT,
+            `contract_expiration_datetime` DATETIME,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            PRIMARY KEY (
+                `exchange_internal_name`,
+                `mapped_instrument_symbol`
+            ),
+            SHARD KEY (
+                `exchange_internal_name`,
+                `mapped_instrument_symbol`
+            ),
+            SORT KEY (
+                `exchange_internal_name`,
+                `mapped_instrument_symbol`,
+                `last_trade_datetime` DESC
+            )
+    );
+
 CREATE TABLE IF NOT EXISTS market.cc_asset_coin_uid_map (
    asset_id BIGINT NOT NULL,
    symbol VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,

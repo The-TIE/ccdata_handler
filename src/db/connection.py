@@ -359,11 +359,12 @@ class DbConnectionManager:
             raise ConnectionError("_execute_many failed, unknown reason after retries.")
 
     def insert_dataframe(
-        self, records: List[dict], table_name: str, replace: bool = False
+        self, records: List[dict], table_name: str, replace: bool = False, schema: Optional[dict] = None
     ) -> int:
         """
         Inserts a list of dictionaries (records) into the specified table.
         Automatically converts records to a Polars DataFrame and uses bulk load.
+        Optionally accepts a schema to explicitly define column types.
 
         Args:
             records (List[dict]): A list of dictionaries, where each dictionary
@@ -379,9 +380,14 @@ class DbConnectionManager:
             logger.info(f"No records provided for insertion into {table_name}.")
             return 0
 
-        # Infer columns from the first record, assuming all records have the same keys
-        columns = list(records[0].keys())
-        df = pl.DataFrame(records)
+        # Infer columns from the first record if schema is not provided
+        if schema is None:
+            columns = list(records[0].keys())
+            df = pl.DataFrame(records)
+        else:
+            columns = list(schema.keys())
+            # Create DataFrame with explicit schema
+            df = pl.DataFrame(records, schema=schema)
 
         logger.info(
             f"Inserting {len(records)} records into {table_name} using bulk load (replace={replace})."

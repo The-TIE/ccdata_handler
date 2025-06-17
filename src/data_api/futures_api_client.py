@@ -41,6 +41,57 @@ class CcdataFuturesApiClient(CcdataBaseApiClient):
             )
 
 
+    def get_futures_markets(self, market: str = None, groups: list = None):
+        """
+        Fetches comprehensive information about futures markets.
+
+        Args:
+            market (str, optional): The exchange to obtain data from. Defaults to None.
+            groups (list, optional): Filter by specific groups of interest. Defaults to None.
+
+        Returns:
+            dict: The API response containing futures market data.
+        """
+        endpoint = "/futures/v1/markets"
+        params = {}
+        if market:
+            params["market"] = market
+        if groups:
+            params["groups"] = groups
+        return self._get(endpoint, params=params)
+
+    def get_futures_markets_instruments(
+        self,
+        market: str = None,
+        instruments: list = None,
+        instrument_status: list = None,
+        groups: list = None,
+    ):
+        """
+        Retrieves a dictionary of mapped instruments across futures markets.
+
+        Args:
+            market (str, optional): The exchange to obtain data from. Defaults to None.
+            instruments (list, optional): The mapped instruments to retrieve. Defaults to None.
+            instrument_status (list, optional): Filter by instrument status. Defaults to None.
+            groups (list, optional): Filter by specific groups of interest. Defaults to None.
+
+        Returns:
+            dict: The API response containing futures market instrument data.
+        """
+        endpoint = "/futures/v1/markets/instruments"
+        params = {}
+        if market:
+            params["market"] = market
+        if instruments:
+            params["instruments"] = instruments
+        if instrument_status:
+            params["instrument_status"] = instrument_status
+        if groups:
+            params["groups"] = groups
+        return self._get(endpoint, params=params)
+
+
 if __name__ == "__main__":
     print("Attempting to initialize CcdataFuturesApiClient...")
     print(f"API Key from env: {'Set' if CCDATA_API_KEY else 'Not Set'}")

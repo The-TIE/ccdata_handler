@@ -375,6 +375,76 @@ This table stores information about the API rate limit status.
 **Shard Key:** (`timestamp`)
 **Sort Key:** (`timestamp`, `use_case`)
 
+## Table: `market.cc_exchanges_futures_details`
+
+This table stores futures market-specific details for exchanges from CryptoCompare's `/futures/v1/markets` endpoint.
+
+| Column Name                   | Type                                          | Nullable | Description                                     |
+|-------------------------------|-----------------------------------------------|----------|-------------------------------------------------|
+| `exchange_internal_name`      | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | CryptoCompare's internal name for the exchange (e.g., `binance`). Foreign key to `market.cc_exchanges_general.internal_name`. |
+| `api_exchange_type`           | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | The type of exchange as reported by the API (`TYPE` field). |
+| `exchange_status`             | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | The operational status of the exchange (`EXCHANGE_STATUS`). |
+| `mapped_instruments_total`    | `INT`                                         | YES      | Total count of mapped instruments on the exchange. |
+| `unmapped_instruments_total`  | `INT`                                         | YES      | Total count of unmapped instruments on the exchange. |
+| `instruments_active_count`    | `INT`                                         | YES      | Number of active instruments.                   |
+| `instruments_ignored_count`   | `INT`                                         | YES      | Number of ignored instruments.                  |
+| `instruments_retired_count`   | `INT`                                         | YES      | Number of retired instruments.                  |
+| `instruments_expired_count`   | `INT`                                         | YES      | Number of expired instruments.                  |
+| `instruments_retired_unmapped_count`| `INT`                                   | YES      | Number of retired unmapped instruments.         |
+| `total_trades_exchange_level` | `BIGINT`                                      | YES      | Total futures trades at the exchange level.        |
+| `total_open_interest_updates` | `BIGINT`                                      | YES      | Total open interest updates at the exchange level. |
+| `total_funding_rate_updates`  | `BIGINT`                                      | YES      | Total funding rate updates at the exchange level. |
+| `has_orderbook_l2_snapshots`  | `BOOLEAN`                                     | YES      | Indicates if the exchange has L2 minute snapshots enabled. |
+| `api_data_retrieved_datetime` | `DATETIME`                                    | YES      | Timestamp when this specific API data was retrieved. |
+| `created_at`                  | `DATETIME`                                    | NO       | Local record creation timestamp.                |
+| `updated_at`                  | `DATETIME`                                    | NO       | Local record update timestamp.                  |
+
+**Primary Key:** (`exchange_internal_name`)
+**Shard Key:** (`exchange_internal_name`)
+**Sort Key:** (`exchange_internal_name`)
+
+## Table: `market.cc_instruments_futures`
+
+This table stores details for individual futures market instruments from CryptoCompare's `/futures/v1/markets/instruments` endpoint.
+
+| Column Name                       | Type                                          | Nullable | Description                               |
+|-----------------------------------|-----------------------------------------------|----------|-------------------------------------------|
+| `exchange_internal_name`          | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | CryptoCompare's internal name for the exchange. Part of PK, FK to `market.cc_exchanges_futures_details`. |
+| `mapped_instrument_symbol`        | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | NO       | The mapped instrument symbol (e.g., `BTC-USD-PERPETUAL`). Part of PK. |
+| `api_instrument_type`             | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | The type of instrument as reported by the API (`TYPE` field). |
+| `instrument_status_on_exchange`   | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | The status of the instrument on the exchange (`INSTRUMENT_STATUS`). |
+| `exchange_instrument_symbol_raw`  | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | The raw instrument symbol on the exchange (`INSTRUMENT`). |
+| `index_underlying_symbol`         | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | The underlying index symbol (e.g., `BTC`). |
+| `index_underlying_id`             | `BIGINT`                                      | YES      | Internal ID for the underlying index asset. FK to `market.cc_assets`. |
+| `quote_currency_symbol`           | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | The quote currency symbol (e.g., `USD`). |
+| `quote_currency_id`               | `BIGINT`                                      | YES      | Internal ID for the quote currency. FK to `market.cc_assets`. |
+| `settlement_currency_symbol`      | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | The settlement currency symbol (e.g., `BTC`). |
+| `settlement_currency_id`          | `BIGINT`                                      | YES      | Internal ID for the settlement currency. FK to `market.cc_assets`. |
+| `contract_currency_symbol`        | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | The contract currency symbol (e.g., `USD`). |
+| `contract_currency_id`            | `BIGINT`                                      | YES      | Internal ID for the contract currency. FK to `market.cc_assets`. |
+| `denomination_type`               | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | The denomination type (e.g., `INVERSE`, `VANILLA`). |
+| `transform_function`              | `VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci` | YES      | Function applied to transform the instrument data. |
+| `instrument_mapping_created_datetime`| `DATETIME`                                 | YES      | Timestamp when the instrument mapping was created (converted from Unix ts). |
+| `has_trades`                      | `BOOLEAN`                                     | YES      | Indicates if the instrument has trades.   |
+| `first_trade_datetime`            | `DATETIME`                                    | YES      | Timestamp of the first trade for this instrument (converted from Unix ts). |
+| `last_trade_datetime`             | `DATETIME`                                    | YES      | Timestamp of the last trade for this instrument (converted from Unix ts). |
+| `total_trades_instrument_level`   | `BIGINT`                                      | YES      | Total futures trades for this instrument.    |
+| `has_funding_rate_updates`        | `BOOLEAN`                                     | YES      | Indicates if the instrument has funding rate updates. |
+| `first_funding_rate_update_datetime`| `DATETIME`                                 | YES      | Timestamp of the first funding rate update (converted from Unix ts). |
+| `last_funding_rate_update_datetime`| `DATETIME`                                 | YES      | Timestamp of the last funding rate update (converted from Unix ts). |
+| `total_funding_rate_updates`      | `BIGINT`                                      | YES      | Total funding rate updates for this instrument. |
+| `has_open_interest_updates`       | `BOOLEAN`                                     | YES      | Indicates if the instrument has open interest updates. |
+| `first_open_interest_update_datetime`| `DATETIME`                                 | YES      | Timestamp of the first open interest update (converted from Unix ts). |
+| `last_open_interest_update_datetime`| `DATETIME`                                 | YES      | Timestamp of the last open interest update (converted from Unix ts). |
+| `total_open_interest_updates`     | `BIGINT`                                      | YES      | Total open interest updates for this instrument. |
+| `contract_expiration_datetime`    | `DATETIME`                                    | YES      | Timestamp of the contract expiration (converted from Unix ts). |
+| `created_at`                      | `DATETIME`                                    | NO       | Local record creation timestamp.          |
+| `updated_at`                      | `DATETIME`                                    | NO       | Local record update timestamp.            |
+
+**Primary Key:** (`exchange_internal_name`, `mapped_instrument_symbol`)
+**Shard Key:** (`exchange_internal_name`, `mapped_instrument_symbol`)
+**Sort Key:** (`exchange_internal_name`, `mapped_instrument_symbol`, `last_trade_datetime DESC`)
+
 ## Table: `market.cc_asset_coin_uid_map`
 
 This table stores the mapping between project asset IDs and the canonical `coin_uid` from `production.coins`, along with the match type and score.
