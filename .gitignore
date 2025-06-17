@@ -29,6 +29,9 @@ data/
 .DS_Store
 Thumbs.db
 
+# LLM Planning Files
+plans/
+
 # Random
 references/data_api/asdf.json
 TODO.md
@@ -39,3 +42,4 @@ references/min_api/exchanges_general_response.json
 
 references/data_api/futures_markets_instruments_response.json
 references/data_api/futures_markets_response.json
+sql/alter_ohlcv_indices_1d_raw_timestamps.sql

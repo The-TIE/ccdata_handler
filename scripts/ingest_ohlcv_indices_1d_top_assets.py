@@ -90,41 +90,40 @@ def ingest_daily_ohlcv_data_for_asset(
 
     last_datetime_in_db = get_last_ingested_datetime(db, market, asset_symbol)
 
-    to_ts = int(datetime.now(timezone.utc).timestamp())
+    today_utc_date = datetime.now(timezone.utc).date()
+    yesterday_utc_date = today_utc_date - timedelta(days=1)
+    to_ts = int(datetime.combine(yesterday_utc_date, datetime.max.time(), tzinfo=timezone.utc).timestamp())
     limit = None
     start_from_log_str = None
 
     if last_datetime_in_db:
-        # Get today's date in UTC
-        today_utc = datetime.now(timezone.utc).date()
-        # Get the date of the last ingested record
         last_ingested_date = last_datetime_in_db.date()
 
-        # If the last ingested date is today or later, no new data is needed
-        if last_ingested_date >= today_utc:
+        if last_ingested_date >= today_utc_date:
             logger.info(
                 f"No new data needed for {instrument} on {market}. Last record is up to date (last ingested: {last_ingested_date})."
             )
             return
-
-        # Fetch data from the day after the last ingested data
-        start_date_to_fetch = last_datetime_in_db + timedelta(days=1)
-
-        # Calculate the number of days between start_date_to_fetch and now
-        delta = datetime.now(timezone.utc) - start_date_to_fetch
-        limit = delta.days + 1  # +1 to include the current partial day if applicable
+        
+        if last_ingested_date == yesterday_utc_date:
+            start_date_to_fetch = last_datetime_in_db
+            limit = 1
+        else:
+            start_date_to_fetch = last_datetime_in_db + timedelta(days=1)
+            delta = yesterday_utc_date - start_date_to_fetch.date()
+            limit = delta.days + 1
 
         start_from_log_str = start_date_to_fetch.strftime("%Y-%m-%d %H:%M:%S UTC")
         logger.info(
-            f"Fetching daily OHLCV for {instrument} on {market} from {start_from_log_str} onwards (limit={limit})."
+            f"Fetching daily OHLCV for {instrument} on {market} from {start_from_log_str} to {yesterday_utc_date.strftime('%Y-%m-%d')} (limit={limit})."
         )
     else:
         # Backfill 2 years if no data exists
         two_years_ago = datetime.now(timezone.utc) - timedelta(days=2 * 365)
-        limit = 730  # Approximately 2 years of daily data
+        limit = (yesterday_utc_date - two_years_ago.date()).days
         start_from_log_str = two_years_ago.strftime("%Y-%m-%d %H:%M:%S UTC")
         logger.info(
-            f"Backfilling 2 years of daily OHLCV for {instrument} on {market} from {start_from_log_str} onwards (limit={limit})."
+            f"Backfilling daily OHLCV for {instrument} on {market} from {start_from_log_str} to {yesterday_utc_date.strftime('%Y-%m-%d')} (limit={limit})."
         )
 
     try:
@@ -145,15 +144,7 @@ def ingest_daily_ohlcv_data_for_asset(
                 )
 
                 # Only ingest data that is newer than the last_datetime_in_db
-                # or if it's the current day (to allow updates for incomplete daily data)
-                is_current_day = (
-                    entry_datetime.date() == datetime.now(timezone.utc).date()
-                )
-                if (
-                    not last_datetime_in_db
-                    or entry_datetime > last_datetime_in_db
-                    or is_current_day
-                ):
+                if not last_datetime_in_db or entry_datetime > last_datetime_in_db:
                     records.append(
                         {
                             "unit": entry.get("UNIT"),
@@ -166,19 +157,13 @@ def ingest_daily_ohlcv_data_for_asset(
                             "high": entry.get("HIGH"),
                             "low": entry.get("LOW"),
                             "close": entry.get("CLOSE"),
-                            "first_message_timestamp": entry.get(
-                                "FIRST_MESSAGE_TIMESTAMP"
-                            ),
-                            "last_message_timestamp": entry.get(
-                                "LAST_MESSAGE_TIMESTAMP"
-                            ),
+                            "first_message_timestamp": datetime.fromtimestamp(entry.get("FIRST_MESSAGE_TIMESTAMP"), tz=timezone.utc) if entry.get("FIRST_MESSAGE_TIMESTAMP") is not None else None,
+                            "last_message_timestamp": datetime.fromtimestamp(entry.get("LAST_MESSAGE_TIMESTAMP"), tz=timezone.utc) if entry.get("LAST_MESSAGE_TIMESTAMP") is not None else None,
                             "first_message_value": entry.get("FIRST_MESSAGE_VALUE"),
                             "high_message_value": entry.get("HIGH_MESSAGE_VALUE"),
-                            "high_message_timestamp": entry.get(
-                                "HIGH_MESSAGE_TIMESTAMP"
-                            ),
+                            "high_message_timestamp": datetime.fromtimestamp(entry.get("HIGH_MESSAGE_TIMESTAMP"), tz=timezone.utc) if entry.get("HIGH_MESSAGE_TIMESTAMP") is not None else None,
                             "low_message_value": entry.get("LOW_MESSAGE_VALUE"),
-                            "low_message_timestamp": entry.get("LOW_MESSAGE_TIMESTAMP"),
+                            "low_message_timestamp": datetime.fromtimestamp(entry.get("LOW_MESSAGE_TIMESTAMP"), tz=timezone.utc) if entry.get("LOW_MESSAGE_TIMESTAMP") is not None else None,
                             "last_message_value": entry.get("LAST_MESSAGE_VALUE"),
                             "total_index_updates": entry.get("TOTAL_INDEX_UPDATES"),
                             "volume": entry.get("VOLUME"),

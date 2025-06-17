@@ -152,41 +152,40 @@ def ingest_daily_ohlcv_data_for_pair(
 
     last_datetime_in_db = get_last_ingested_datetime(db, exchange, instrument)
 
-    to_ts = int(datetime.now(timezone.utc).timestamp())
+    today_utc_date = datetime.now(timezone.utc).date()
+    yesterday_utc_date = today_utc_date - timedelta(days=1)
+    to_ts = int(datetime.combine(yesterday_utc_date, datetime.max.time(), tzinfo=timezone.utc).timestamp())
     limit = None
     start_from_log_str = None
 
     if last_datetime_in_db:
-        # Get today's date in UTC
-        today_utc = datetime.now(timezone.utc).date()
-        # Get the date of the last ingested record
         last_ingested_date = last_datetime_in_db.date()
 
-        # If the last ingested date is today or later, no new data is needed
-        if last_ingested_date >= today_utc:
+        if last_ingested_date >= today_utc_date:
             logger.info(
                 f"No new data needed for {instrument} on {exchange}. Last record is up to date (last ingested: {last_ingested_date})."
             )
             return
-
-        # Fetch data from the day after the last ingested data
-        start_date_to_fetch = last_datetime_in_db + timedelta(days=1)
-
-        # Calculate the number of days between start_date_to_fetch and now
-        delta = datetime.now(timezone.utc) - start_date_to_fetch
-        limit = delta.days + 1  # +1 to include the current partial day if applicable
+        
+        if last_ingested_date == yesterday_utc_date:
+            start_date_to_fetch = last_datetime_in_db
+            limit = 1
+        else:
+            start_date_to_fetch = last_datetime_in_db + timedelta(days=1)
+            delta = yesterday_utc_date - start_date_to_fetch.date()
+            limit = delta.days + 1
 
         start_from_log_str = start_date_to_fetch.strftime("%Y-%m-%d %H:%M:%S UTC")
         logger.info(
-            f"Fetching daily OHLCV for {instrument} on {exchange} from {start_from_log_str} onwards (limit={limit})."
+            f"Fetching daily OHLCV for {instrument} on {exchange} from {start_from_log_str} to {yesterday_utc_date.strftime('%Y-%m-%d')} (limit={limit})."
         )
     else:
         # Backfill 2 years if no data exists
         two_years_ago = datetime.now(timezone.utc) - timedelta(days=2 * 365)
-        limit = 730  # Approximately 2 years of daily data
+        limit = (yesterday_utc_date - two_years_ago.date()).days
         start_from_log_str = two_years_ago.strftime("%Y-%m-%d %H:%M:%S UTC")
         logger.info(
-            f"Backfilling 2 years of daily OHLCV for {instrument} on {exchange} from {start_from_log_str} onwards (limit={limit})."
+            f"Backfilling 2 years of daily OHLCV for {instrument} on {exchange} from {start_from_log_str} to {yesterday_utc_date.strftime('%Y-%m-%d')} (limit={limit})."
         )
 
     try:
@@ -207,15 +206,7 @@ def ingest_daily_ohlcv_data_for_pair(
                 )
 
                 # Only ingest data that is newer than the last_datetime_in_db
-                # or if it's the current day (to allow updates for incomplete daily data)
-                is_current_day = (
-                    entry_datetime.date() == datetime.now(timezone.utc).date()
-                )
-                if (
-                    not last_datetime_in_db
-                    or entry_datetime > last_datetime_in_db
-                    or is_current_day
-                ):
+                if not last_datetime_in_db or entry_datetime > last_datetime_in_db:
                     records.append(
                         {
                             "datetime": entry_datetime,

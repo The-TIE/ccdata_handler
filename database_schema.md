@@ -60,13 +60,13 @@ This table stores daily Open, High, Low, Close, and Volume (OHLCV) data for cryp
 | `high`                | `DOUBLE`         | YES      | The highest price for the period.               |
 | `low`                 | `DOUBLE`         | YES      | The lowest price for the period.                |
 | `close`               | `DOUBLE`         | YES      | The closing price for the period.               |
-| `first_message_timestamp`| `BIGINT`      | YES      | Unix timestamp of the first message in the period.|
-| `last_message_timestamp`| `BIGINT`      | YES      | Unix timestamp of the last message in the period. |
+| `first_message_timestamp`| `DATETIME`      | YES      | Unix timestamp of the first message in the period.|
+| `last_message_timestamp`| `DATETIME`      | YES      | Unix timestamp of the last message in the period. |
 | `first_message_value` | `DOUBLE`         | YES      | Value of the first message in the period.       |
 | `high_message_value`  | `DOUBLE`         | YES      | Value of the highest message in the period.     |
-| `high_message_timestamp`| `BIGINT`      | YES      | Timestamp of the highest message in the period. |
+| `high_message_timestamp`| `DATETIME`      | YES      | Timestamp of the highest message in the period. |
 | `low_message_value`   | `DOUBLE`         | YES      | Value of the lowest message in the period.      |
-| `low_message_timestamp`| `BIGINT`      | YES      | Timestamp of the lowest message in the period.  |
+| `low_message_timestamp`| `DATETIME`      | YES      | Timestamp of the lowest message in the period.  |
 | `last_message_value`  | `DOUBLE`         | YES      | Value of the last message in the period.        |
 | `total_index_updates` | `BIGINT`      | YES      | Total number of index updates in the period.    |
 | `volume`              | `DOUBLE`         | YES      | Volume in base asset.                           |
