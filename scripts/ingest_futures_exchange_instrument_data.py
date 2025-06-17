@@ -22,10 +22,26 @@ log_file_path = os.path.join(
 logger = setup_logger(__name__, log_to_console=True, log_file_path=log_file_path)
 
 
+def _to_int_bool(value):
+    """Converts a boolean or its string representation to an integer (1 or 0)."""
+    if value is None:
+        return 0
+    return 1 if str(value).lower() == "true" else 0
+
+
 def fetch_futures_exchange_instrument_data(futures_client):
     """Fetch all futures market instrument data from the API."""
     logger.info("Fetching futures market instrument data.")
-    response = futures_client.get_futures_markets_instruments()
+    list_instrument_status = [
+        "ACTIVE",
+        "IGNORED",
+        "RETIRED",
+        "EXPIRED",
+        "READY_FOR_DECOMMISSIONING",
+    ]
+    response = futures_client.get_futures_markets_instruments(
+        instrument_status=list_instrument_status
+    )
     if not response or response.get("Response") == "Error":
         logger.error(
             f"Failed to retrieve futures market instrument data: {response.get('Message', 'Unknown error')}"
@@ -75,8 +91,8 @@ def transform_futures_exchange_instrument_data(raw_data):
                 "total_trades_exchange_level": exchange_info.get("TOTAL_TRADES_FUTURES"),
                 "total_open_interest_updates": exchange_info.get("TOTAL_OPEN_INTEREST_UPDATES"),
                 "total_funding_rate_updates": exchange_info.get("TOTAL_FUNDING_RATE_UPDATES"),
-                "has_orderbook_l2_snapshots": exchange_info.get(
-                    "HAS_ORDERBOOK_L2_MINUTE_SNAPSHOTS_ENABLED"
+                "has_orderbook_l2_snapshots": _to_int_bool(
+                    exchange_info.get("HAS_ORDERBOOK_L2_MINUTE_SNAPSHOTS_ENABLED")
                 ),
                 "api_data_retrieved_datetime": now_utc.isoformat(),
                 "created_at": now_utc.isoformat(),
@@ -121,7 +137,7 @@ def transform_futures_exchange_instrument_data(raw_data):
                     "instrument_mapping_created_datetime": (
                         (datetime.fromtimestamp(mapping_created_ts, tz=timezone.utc).isoformat() if mapping_created_ts else None)
                     ),
-                    "has_trades": instrument_info.get("HAS_TRADES_FUTURES"),
+                    "has_trades": _to_int_bool(instrument_info.get("HAS_TRADES_FUTURES")),
                     "first_trade_datetime": (
                         (datetime.fromtimestamp(first_trade_ts, tz=timezone.utc).isoformat() if first_trade_ts else None)
                     ),
@@ -131,7 +147,9 @@ def transform_futures_exchange_instrument_data(raw_data):
                     "total_trades_instrument_level": instrument_info.get(
                         "TOTAL_TRADES_FUTURES"
                     ),
-                    "has_funding_rate_updates": instrument_info.get("HAS_FUNDING_RATE_UPDATES"),
+                    "has_funding_rate_updates": _to_int_bool(
+                        instrument_info.get("HAS_FUNDING_RATE_UPDATES")
+                    ),
                     "first_funding_rate_update_datetime": (
                         (datetime.fromtimestamp(first_funding_rate_ts, tz=timezone.utc).isoformat() if first_funding_rate_ts else None)
                     ),
@@ -139,7 +157,9 @@ def transform_futures_exchange_instrument_data(raw_data):
                         (datetime.fromtimestamp(last_funding_rate_ts, tz=timezone.utc).isoformat() if last_funding_rate_ts else None)
                     ),
                     "total_funding_rate_updates": instrument_info.get("TOTAL_FUNDING_RATE_UPDATES"),
-                     "has_open_interest_updates": instrument_info.get("HAS_OPEN_INTEREST_UPDATES"),
+                    "has_open_interest_updates": _to_int_bool(
+                        instrument_info.get("HAS_OPEN_INTEREST_UPDATES")
+                    ),
                     "first_open_interest_update_datetime": (
                         (datetime.fromtimestamp(first_open_interest_ts, tz=timezone.utc).isoformat() if first_open_interest_ts else None)
                     ),
@@ -177,7 +197,7 @@ def insert_futures_exchange_instrument_data(db_manager, transformed_data):
         "total_trades_exchange_level": pl.Int64,
         "total_open_interest_updates": pl.Int64,
         "total_funding_rate_updates": pl.Int64,
-        "has_orderbook_l2_snapshots": pl.Boolean,
+        "has_orderbook_l2_snapshots": pl.Int64,
         "api_data_retrieved_datetime": pl.Utf8, # Changed to Utf8 as we are storing ISO strings
         "created_at": pl.Utf8, # Changed to Utf8 as we are storing ISO strings
         "updated_at": pl.Utf8, # Changed to Utf8 as we are storing ISO strings
@@ -214,15 +234,15 @@ def insert_futures_exchange_instrument_data(db_manager, transformed_data):
         "denomination_type": pl.Utf8,
         "transform_function": pl.Utf8,
         "instrument_mapping_created_datetime": pl.Utf8, # Changed to Utf8
-        "has_trades": pl.Boolean,
+        "has_trades": pl.Int64,
         "first_trade_datetime": pl.Utf8, # Changed to Utf8
         "last_trade_datetime": pl.Utf8, # Changed to Utf8
         "total_trades_instrument_level": pl.Int64,
-        "has_funding_rate_updates": pl.Boolean,
+        "has_funding_rate_updates": pl.Int64,
         "first_funding_rate_update_datetime": pl.Utf8, # Changed to Utf8
         "last_funding_rate_update_datetime": pl.Utf8, # Changed to Utf8
         "total_funding_rate_updates": pl.Int64,
-        "has_open_interest_updates": pl.Boolean,
+        "has_open_interest_updates": pl.Int64,
         "first_open_interest_update_datetime": pl.Utf8, # Changed to Utf8
         "last_open_interest_update_datetime": pl.Utf8, # Changed to Utf8
         "total_open_interest_updates": pl.Int64,
