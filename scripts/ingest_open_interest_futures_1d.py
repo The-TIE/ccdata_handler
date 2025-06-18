@@ -7,7 +7,7 @@ import time
 
 from src.logger_config import setup_logger
 from src.db.connection import DbConnectionManager
-from src.db.utils import deduplicate_table
+from src.db.utils import deduplicate_table, ensure_utc_datetime
 from src.data_api.futures_api_client import CcdataFuturesApiClient
 from src.rate_limit_tracker import record_rate_limit_status
 
@@ -70,7 +70,11 @@ def get_futures_instruments_from_db(
         results = db._execute_query(query, params=params, fetch=True)
         if results:
             # Results are (exchange_internal_name, mapped_instrument_symbol, last_open_interest_update_datetime, first_open_interest_update_datetime)
-            instruments = [(row[0], row[1], row[2], row[3]) for row in results]
+            instruments = []
+            for row in results:
+                last_update_dt = ensure_utc_datetime(row[2])
+                first_update_dt = ensure_utc_datetime(row[3])
+                instruments.append((row[0], row[1], last_update_dt, first_update_dt))
             logger.info(f"Found {len(instruments)} futures instruments in database.")
             return instruments
         else:

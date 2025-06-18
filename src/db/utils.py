@@ -1,8 +1,22 @@
 import json
 from datetime import datetime, timezone
+from typing import Optional
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def ensure_utc_datetime(dt: Optional[datetime]) -> Optional[datetime]:
+    """
+    Ensures a datetime object is timezone-aware and in UTC.
+    If the datetime object is None or already timezone-aware, it is returned as is.
+    If it's offset-naive, it's converted to UTC.
+    """
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(timezone.utc)
 
 
 def get_table_columns(db_manager, table):
