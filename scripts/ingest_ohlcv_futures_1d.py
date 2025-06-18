@@ -69,8 +69,8 @@ def get_futures_instruments_from_db(
         )
         results = db._execute_query(query, params=params, fetch=True)
         if results:
-            # Results are (exchange_internal_name, mapped_instrument_symbol, last_trade_datetime)
-            instruments = [(row[0], row[1], row[2]) for row in results]
+            # Results are (exchange_internal_name, mapped_instrument_symbol, last_trade_datetime, first_trade_datetime)
+            instruments = [(row[0], row[1], row[2], row[3]) for row in results]
             logger.info(f"Found {len(instruments)} futures instruments in database.")
             return instruments
         else:
@@ -117,7 +117,8 @@ def ingest_daily_ohlcv_data_for_instrument(
     db: DbConnectionManager,
     market: str,
     mapped_instrument: str,
-    last_trade_datetime: Optional[datetime], # Added last_trade_datetime parameter
+    last_trade_datetime: Optional[datetime],
+    first_trade_datetime: Optional[datetime],
 ):
     """
     Fetches daily OHLCV data for a specific futures instrument and ingests it into the database.
@@ -141,12 +142,19 @@ def ingest_daily_ohlcv_data_for_instrument(
             f"Continuing ingestion for {mapped_instrument} on {market} from {start_date_to_fetch.strftime('%Y-%m-%d %H:%M:%S UTC')}."
         )
     else:
-        # If no data exists, backfill for 2 years
-        two_years_ago = datetime.now(timezone.utc) - timedelta(days=max_limit_per_call)
-        start_date_to_fetch = datetime.combine(two_years_ago.date(), datetime.min.time(), tzinfo=timezone.utc)
-        logger.info(
-            f"No existing data for {mapped_instrument} on {market}. Backfilling from {start_date_to_fetch.strftime('%Y-%m-%d %H:%M:%S UTC')}."
-        )
+        # If no data exists, start backfill from the first trade datetime
+        if first_trade_datetime:
+            start_date_to_fetch = first_trade_datetime
+            logger.info(
+                f"No existing data for {mapped_instrument} on {market}. Backfilling from first trade datetime: {start_date_to_fetch.strftime('%Y-%m-%d %H:%M:%S UTC')}."
+            )
+        else:
+            # Fallback to 2 years ago if first_trade_datetime is not available
+            two_years_ago = datetime.now(timezone.utc) - timedelta(days=max_limit_per_call)
+            start_date_to_fetch = datetime.combine(two_years_ago.date(), datetime.min.time(), tzinfo=timezone.utc)
+            logger.info(
+                f"No existing data for {mapped_instrument} on {market} and no first trade datetime. Backfilling from {start_date_to_fetch.strftime('%Y-%m-%d %H:%M:%S UTC')}."
+            )
 
     # Determine the effective end timestamp for fetching
     # This is the minimum of yesterday's end and the instrument's last trade datetime
@@ -315,13 +323,21 @@ def main():
 
     # Determine instruments to process
     if args.instruments:
-        # When instruments are manually specified, we don't have last_trade_datetime from DB.
-        # In this case, we assume they are active or we want to fetch up to yesterday.
-        instruments_to_process = [
-            (exchange, instrument.strip(), None) # last_trade_datetime is None
-            for exchange in exchanges_to_process
-            for instrument in args.instruments.split(",")
-        ]
+        # If instruments are manually specified, fetch their details from the database,
+        # respecting the provided instrument_status filter.
+        user_specified_instruments = [instrument.strip() for instrument in args.instruments.split(",")]
+        instruments_to_process = []
+        for exchange in exchanges_to_process:
+            fetched_instruments = get_futures_instruments_from_db(
+                db_connection, [exchange], instrument_statuses
+            )
+            for inst in fetched_instruments:
+                if inst[1] in user_specified_instruments:
+                    instruments_to_process.append(inst)
+        
+        if not instruments_to_process:
+            logger.error("No user-specified futures instruments found in the database for the given criteria. Aborting.")
+            return
         logger.info(f"Processing user-specified instruments: {instruments_to_process}")
     else:
         instruments_to_process = get_futures_instruments_from_db(
@@ -331,9 +347,9 @@ def main():
             logger.error("No futures instruments found for the given criteria. Aborting.")
             return
 
-    for market, mapped_instrument, last_trade_datetime in instruments_to_process:
+    for market, mapped_instrument, last_trade_datetime, first_trade_datetime in instruments_to_process:
         ingest_daily_ohlcv_data_for_instrument(
-            futures_api_client, db_connection, market, mapped_instrument, last_trade_datetime
+            futures_api_client, db_connection, market, mapped_instrument, last_trade_datetime, first_trade_datetime
         )
         time.sleep(0.1)  # Small delay to avoid hitting API rate limits too quickly
 
