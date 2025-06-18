@@ -163,14 +163,14 @@ class CcdataFuturesApiClient(CcdataBaseApiClient):
         Returns:
             dict: The API response containing OI OHLC data.
         """
-        endpoint = f"/futures/v1/historical/oi/{interval}"
+        endpoint = f"/futures/v1/historical/open-interest/{interval}"
         params = {
             "market": market,
             "instrument": instrument,
             "limit": limit,
             "aggregate": aggregate,
-            "fill": fill,
-            "apply_mapping": apply_mapping,
+            "fill": 1 if fill else 0, # Convert boolean to 1 or 0
+            "apply_mapping": 1 if apply_mapping else 0, # Convert boolean to 1 or 0
             "response_format": response_format,
         }
         if groups:
@@ -216,8 +216,8 @@ class CcdataFuturesApiClient(CcdataBaseApiClient):
             "instrument": instrument,
             "limit": limit,
             "aggregate": aggregate,
-            "fill": fill,
-            "apply_mapping": apply_mapping,
+            "fill": 1 if fill else 0, # Convert boolean to 1 or 0
+            "apply_mapping": 1 if apply_mapping else 0, # Convert boolean to 1 or 0
             "response_format": response_format,
         }
         if groups:

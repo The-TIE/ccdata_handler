@@ -639,6 +639,7 @@ This table stores 1-minute Open, High, Low, Close (OHLC) data for futures open i
 | `low_quote_mark_price`      | `DOUBLE`     | YES     | The quote mark price at the lowest open interest for the period.   |
 | `close_mark_price`          | `DOUBLE`     | YES     | The closing mark price for the period.                             |
 | `total_open_interest_updates`| `BIGINT`    | YES     | Total number of open interest updates in the period.               |
+| `collected_at`              | `DATETIME`   | NO      | Timestamp when the data was collected.                             |
 
 **Primary Key:** (`datetime`, `market`, `mapped_instrument`)
 **Sort Key:** (`datetime`, `market`, `mapped_instrument`)
@@ -680,6 +681,7 @@ This table stores 1-hour Open, High, Low, Close (OHLC) data for futures open int
 | `low_quote_mark_price`      | `DOUBLE`     | YES     | The quote mark price at the lowest open interest for the period.   |
 | `close_mark_price`          | `DOUBLE`     | YES     | The closing mark price for the period.                             |
 | `total_open_interest_updates`| `BIGINT`    | YES     | Total number of open interest updates in the period.               |
+| `collected_at`              | `DATETIME`   | NO      | Timestamp when the data was collected.                             |
 
 **Primary Key:** (`datetime`, `market`, `mapped_instrument`)
 **Sort Key:** (`datetime`, `market`, `mapped_instrument`)
@@ -721,6 +723,7 @@ This table stores daily Open, High, Low, Close (OHLC) data for futures open inte
 | `low_quote_mark_price`      | `DOUBLE`     | YES     | The quote mark price at the lowest open interest for the period.   |
 | `close_mark_price`          | `DOUBLE`     | YES     | The closing mark price for the period.                             |
 | `total_open_interest_updates`| `BIGINT`    | YES     | Total number of open interest updates in the period.               |
+| `collected_at`              | `DATETIME`   | NO      | Timestamp when the data was collected.                             |
 
 **Primary Key:** (`datetime`, `market`, `mapped_instrument`)
 **Sort Key:** (`datetime`, `market`, `mapped_instrument`)
@@ -777,6 +780,7 @@ This table stores 1-hour Open, High, Low, Close (OHLC) data for futures funding 
 | `low_fr`                    | `DOUBLE`     | YES     | The lowest funding rate for the period.                            |
 | `close_fr`                  | `DOUBLE`     | YES     | The closing funding rate for the period.                           |
 | `total_funding_rate_updates`| `BIGINT`     | YES     | Total number of funding rate updates in the period.                |
+| `collected_at`              | `DATETIME`   | NO      | Timestamp when the data was collected.                             |
 
 **Primary Key:** (`datetime`, `market`, `mapped_instrument`)
 **Sort Key:** (`datetime`, `market`, `mapped_instrument`)

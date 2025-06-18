@@ -178,7 +178,7 @@ def ingest_daily_open_interest_data_for_instrument(
         )
 
         try:
-            data = futures_api_client.get_futures_historical_open_interest(
+            data = futures_api_client.get_futures_historical_oi_ohlc(
                 interval="days",
                 market=market,
                 instrument=mapped_instrument,
@@ -226,6 +226,7 @@ def ingest_daily_open_interest_data_for_instrument(
                                 "low_quote_mark_price": entry.get("LOW_QUOTE_MARK_PRICE"),
                                 "close_mark_price": entry.get("CLOSE_MARK_PRICE"),
                                 "total_open_interest_updates": entry.get("TOTAL_OPEN_INTEREST_UPDATES"),
+                                "collected_at": datetime.now(timezone.utc),
                             }
                         )
                 if records:

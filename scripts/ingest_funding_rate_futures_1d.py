@@ -178,7 +178,7 @@ def ingest_daily_funding_rate_data_for_instrument(
         )
 
         try:
-            data = futures_api_client.get_futures_historical_funding_rate(
+            data = futures_api_client.get_futures_historical_funding_rate_ohlc(
                 interval="days",
                 market=market,
                 instrument=mapped_instrument,
@@ -213,6 +213,7 @@ def ingest_daily_funding_rate_data_for_instrument(
                                 "low_fr": entry.get("LOW"),
                                 "close_fr": entry.get("CLOSE"),
                                 "total_funding_rate_updates": entry.get("TOTAL_FUNDING_RATE_UPDATES"),
+                                "collected_at": datetime.now(timezone.utc),
                             }
                         )
                 if records:
