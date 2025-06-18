@@ -501,8 +501,9 @@ This table stores daily Open, High, Low, Close, and Volume (OHLCV) data for futu
 | `low_trade_price`       | `DOUBLE`     | YES     | Price of the lowest trade in the period.                           |
 | `low_trade_timestamp`   | `DATETIME`   | YES     | Timestamp of the lowest trade in the period.                       |
 | `last_trade_price`      | `DOUBLE`     | YES     | Price of the last trade in the period.                             |
+| `collected_at`          | `DATETIME`   | NO      | Timestamp when the data was collected.                             |
 
-**Primary Key:** (`datetime`, `market`, `mapped_instrument`)  
+**Primary Key:** (`datetime`, `market`, `mapped_instrument`)
 **Sort Key:** (`datetime`, `market`, `mapped_instrument`)
 
 ---
@@ -548,6 +549,7 @@ This table stores 1-minute Open, High, Low, Close, and Volume (OHLCV) data for f
 | `low_trade_price`       | `DOUBLE`     | YES     | Price of the lowest trade in the period.                           |
 | `low_trade_timestamp`   | `DATETIME`   | YES     | Timestamp of the lowest trade in the period.                       |
 | `last_trade_price`      | `DOUBLE`     | YES     | Price of the last trade in the period.                             |
+| `collected_at`          | `DATETIME`   | NO      | Timestamp when the data was collected.                             |
 
 **Primary Key:** (`datetime`, `market`, `mapped_instrument`)
 **Sort Key:** (`datetime`, `market`, `mapped_instrument`)
@@ -595,6 +597,7 @@ This table stores 1-hour Open, High, Low, Close, and Volume (OHLCV) data for fut
 | `low_trade_price`       | `DOUBLE`     | YES     | Price of the lowest trade in the period.                           |
 | `low_trade_timestamp`   | `DATETIME`   | YES     | Timestamp of the lowest trade in the period.                       |
 | `last_trade_price`      | `DOUBLE`     | YES     | Price of the last trade in the period.                             |
+| `collected_at`          | `DATETIME`   | NO      | Timestamp when the data was collected.                             |
 
 **Primary Key:** (`datetime`, `market`, `mapped_instrument`)
 **Sort Key:** (`datetime`, `market`, `mapped_instrument`)

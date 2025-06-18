@@ -567,6 +567,7 @@ CREATE TABLE market.cc_futures_ohlcv_1m (
     low_trade_price DOUBLE,
     low_trade_timestamp DATETIME,
     last_trade_price DOUBLE,
+    collected_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (datetime, market, mapped_instrument),
     SORT KEY (datetime, market, mapped_instrument)
 );
@@ -607,6 +608,7 @@ CREATE TABLE market.cc_futures_ohlcv_1h (
     low_trade_price DOUBLE,
     low_trade_timestamp DATETIME,
     last_trade_price DOUBLE,
+    collected_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (datetime, market, mapped_instrument),
     SORT KEY (datetime, market, mapped_instrument)
 );
@@ -647,6 +649,7 @@ CREATE TABLE market.cc_futures_ohlcv_1d (
     low_trade_price DOUBLE,
     low_trade_timestamp DATETIME,
     last_trade_price DOUBLE,
+    collected_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (datetime, market, mapped_instrument),
     SORT KEY (datetime, market, mapped_instrument)
 );
@@ -683,6 +686,7 @@ CREATE TABLE market.cc_futures_open_interest_ohlc_1m (
     low_quote_mark_price DOUBLE,
     close_mark_price DOUBLE,
     total_open_interest_updates BIGINT,
+    collected_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (datetime, market, mapped_instrument),
     SORT KEY (datetime, market, mapped_instrument)
 );
@@ -718,6 +722,7 @@ CREATE TABLE market.cc_futures_open_interest_ohlc_1h (
     close_mark_price DOUBLE,
     total_open_interest_updates BIGINT,
     PRIMARY KEY (datetime, market, mapped_instrument),
+    collected_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     SORT KEY (datetime, market, mapped_instrument)
 );
 
@@ -752,6 +757,7 @@ CREATE TABLE market.cc_futures_open_interest_ohlc_1d (
     close_mark_price DOUBLE,
     total_open_interest_updates BIGINT,
     PRIMARY KEY (datetime, market, mapped_instrument),
+    collected_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     SORT KEY (datetime, market, mapped_instrument)
 );
 
@@ -774,6 +780,7 @@ CREATE TABLE market.cc_futures_funding_rate_ohlc_1m (
     low_fr DOUBLE,
     close_fr DOUBLE,
     total_funding_rate_updates BIGINT,
+    collected_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (datetime, market, mapped_instrument),
     SORT KEY (datetime, market, mapped_instrument)
 );
@@ -795,6 +802,7 @@ CREATE TABLE market.cc_futures_funding_rate_ohlc_1h (
     low_fr DOUBLE,
     close_fr DOUBLE,
     total_funding_rate_updates BIGINT,
+    collected_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (datetime, market, mapped_instrument),
     SORT KEY (datetime, market, mapped_instrument)
 );
@@ -816,6 +824,7 @@ CREATE TABLE market.cc_futures_funding_rate_ohlc_1d (
     low_fr DOUBLE,
     close_fr DOUBLE,
     total_funding_rate_updates BIGINT,
+    collected_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (datetime, market, mapped_instrument),
     SORT KEY (datetime, market, mapped_instrument)
 );
