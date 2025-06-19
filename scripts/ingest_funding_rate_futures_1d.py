@@ -75,7 +75,8 @@ def get_futures_instruments_from_db(
             for row in results:
                 last_update_dt = ensure_utc_datetime(row[2])
                 first_update_dt = ensure_utc_datetime(row[3])
-                instruments.append((row[0], row[1], last_update_dt, first_update_dt))
+                instrument_status = row[4]
+                instruments.append((row[0], row[1], last_update_dt, first_update_dt, instrument_status))
             logger.info(f"Found {len(instruments)} futures instruments in database.")
             return instruments
         else:
@@ -124,6 +125,7 @@ def ingest_daily_funding_rate_data_for_instrument(
     mapped_instrument: str,
     last_funding_rate_update_datetime: Optional[datetime],
     first_funding_rate_update_datetime: Optional[datetime],
+    instrument_status: str,
 ):
     """
     Fetches daily funding rate data for a specific futures instrument and ingests it into the database.
@@ -162,10 +164,11 @@ def ingest_daily_funding_rate_data_for_instrument(
             )
 
     # Determine the effective end timestamp for fetching
-    # This is the minimum of the end of the previous day and the instrument's last funding rate update datetime
-    effective_to_ts_date = end_of_previous_day
-    if last_funding_rate_update_datetime and last_funding_rate_update_datetime.date() < end_of_previous_day:
-        effective_to_ts_date = last_funding_rate_update_datetime.date()
+    # If the instrument is active, use the end of the previous day. Otherwise, use the last update datetime from the database.
+    if instrument_status == "ACTIVE":
+        effective_to_ts_date = end_of_previous_day
+    else:
+        effective_to_ts_date = last_funding_rate_update_datetime.date() if last_funding_rate_update_datetime else end_of_previous_day
 
     current_to_ts = int(datetime.combine(effective_to_ts_date, datetime.max.time(), tzinfo=timezone.utc).timestamp())
     
@@ -250,7 +253,7 @@ def ingest_daily_funding_rate_data_for_instrument(
 
         # Prepare for the next batch
         start_date_to_fetch = datetime.fromtimestamp(batch_to_ts, tz=timezone.utc) + timedelta(days=1)
-        if start_date_to_fetch.date() > today_utc:
+        if start_date_to_fetch > today_utc:
             break # All data up to today has been fetched
 
         # If the last fetched timestamp is the same as the start_date_to_fetch, it means no new data was found
@@ -331,9 +334,9 @@ def main():
             logger.error("No futures instruments found for the given criteria. Aborting.")
             return
 
-    for market, mapped_instrument, last_funding_rate_update_datetime, first_funding_rate_update_datetime in instruments_to_process:
+    for market, mapped_instrument, last_funding_rate_update_datetime, first_funding_rate_update_datetime, instrument_status in instruments_to_process:
         ingest_daily_funding_rate_data_for_instrument(
-            futures_api_client, db_connection, market, mapped_instrument, last_funding_rate_update_datetime, first_funding_rate_update_datetime
+            futures_api_client, db_connection, market, mapped_instrument, last_funding_rate_update_datetime, first_funding_rate_update_datetime, instrument_status
         )
         time.sleep(0.1)  # Small delay to avoid hitting API rate limits too quickly
 

@@ -250,6 +250,7 @@ def ingest_minute_ohlcv_data_for_instrument(
                                 "low_trade_price": entry.get("LOW_TRADE_PRICE"),
                                 "low_trade_timestamp": datetime.fromtimestamp(entry.get("LOW_TRADE_TIMESTAMP"), tz=timezone.utc) if entry.get("LOW_TRADE_TIMESTAMP") is not None else None,
                                 "last_trade_price": entry.get("LAST_TRADE_PRICE"),
+                                "collected_at": datetime.now(timezone.utc),
                             }
                         )
                 if records:

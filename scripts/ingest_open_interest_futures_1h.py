@@ -75,7 +75,8 @@ def get_futures_instruments_from_db(
             for row in results:
                 last_update_dt = ensure_utc_datetime(row[2])
                 first_update_dt = ensure_utc_datetime(row[3])
-                instruments.append((row[0], row[1], last_update_dt, first_update_dt))
+                instrument_status = row[4]
+                instruments.append((row[0], row[1], last_update_dt, first_update_dt, instrument_status))
             logger.info(f"Found {len(instruments)} futures instruments in database.")
             return instruments
         else:
@@ -124,6 +125,7 @@ def ingest_hourly_open_interest_data_for_instrument(
     mapped_instrument: str,
     last_open_interest_update_datetime: Optional[datetime],
     first_open_interest_update_datetime: Optional[datetime],
+    instrument_status: str,
 ):
     """
     Fetches hourly open interest data for a specific futures instrument and ingests it into the database.
@@ -162,10 +164,11 @@ def ingest_hourly_open_interest_data_for_instrument(
             )
 
     # Determine the effective end timestamp for fetching
-    # This is the minimum of the end of the previous hour and the instrument's last open interest update datetime
-    effective_to_ts_datetime = end_of_previous_hour
-    if last_open_interest_update_datetime and last_open_interest_update_datetime < end_of_previous_hour:
-        effective_to_ts_datetime = last_open_interest_update_datetime
+    # If the instrument is active, use the end of the previous hour. Otherwise, use the last update datetime from the database.
+    if instrument_status == "ACTIVE":
+        effective_to_ts_datetime = end_of_previous_hour
+    else:
+        effective_to_ts_datetime = last_open_interest_update_datetime if last_open_interest_update_datetime else end_of_previous_hour
 
     current_to_ts = int(effective_to_ts_datetime.timestamp())
     
@@ -343,9 +346,9 @@ def main():
             logger.error("No futures instruments found for the given criteria. Aborting.")
             return
 
-    for market, mapped_instrument, last_open_interest_update_datetime, first_open_interest_update_datetime in instruments_to_process:
+    for market, mapped_instrument, last_open_interest_update_datetime, first_open_interest_update_datetime, instrument_status in instruments_to_process:
         ingest_hourly_open_interest_data_for_instrument(
-            futures_api_client, db_connection, market, mapped_instrument, last_open_interest_update_datetime, first_open_interest_update_datetime
+            futures_api_client, db_connection, market, mapped_instrument, last_open_interest_update_datetime, first_open_interest_update_datetime, instrument_status
         )
         time.sleep(0.1)  # Small delay to avoid hitting API rate limits too quickly
 
