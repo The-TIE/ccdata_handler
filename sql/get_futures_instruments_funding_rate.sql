@@ -2,7 +2,8 @@ SELECT
   exchange_internal_name,
   mapped_instrument_symbol,
   last_funding_rate_update_datetime,
-  first_funding_rate_update_datetime
+  first_funding_rate_update_datetime,
+  instrument_status_on_exchange
 FROM market.cc_instruments_futures
 WHERE
   exchange_internal_name IN %s AND

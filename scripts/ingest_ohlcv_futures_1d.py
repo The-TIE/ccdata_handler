@@ -10,6 +10,7 @@ from src.db.connection import DbConnectionManager
 from src.db.utils import deduplicate_table, ensure_utc_datetime
 from src.data_api.futures_api_client import CcdataFuturesApiClient
 from src.rate_limit_tracker import record_rate_limit_status
+from src.utils import get_end_of_previous_period
 
 # Load environment variables from .env file
 load_dotenv()
@@ -136,8 +137,8 @@ def ingest_daily_ohlcv_data_for_instrument(
 
     last_datetime_in_db = get_last_ingested_datetime(db, market, mapped_instrument)
 
-    today_utc = datetime.now(timezone.utc).date()
-    yesterday_utc_date = today_utc - timedelta(days=1)
+    today_utc = datetime.now(timezone.utc)
+    end_of_previous_day = get_end_of_previous_period(today_utc, "days").date()
     
     # Determine the start date for fetching
     if last_datetime_in_db:
@@ -161,9 +162,9 @@ def ingest_daily_ohlcv_data_for_instrument(
             )
 
     # Determine the effective end timestamp for fetching
-    # This is the minimum of yesterday's end and the instrument's last trade datetime
-    effective_to_ts_date = yesterday_utc_date
-    if last_trade_datetime and last_trade_datetime.date() < yesterday_utc_date:
+    # This is the minimum of the end of the previous day and the instrument's last trade datetime
+    effective_to_ts_date = end_of_previous_day
+    if last_trade_datetime and last_trade_datetime.date() < end_of_previous_day:
         effective_to_ts_date = last_trade_datetime.date()
 
     current_to_ts = int(datetime.combine(effective_to_ts_date, datetime.max.time(), tzinfo=timezone.utc).timestamp())

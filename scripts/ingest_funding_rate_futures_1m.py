@@ -10,6 +10,7 @@ from src.db.connection import DbConnectionManager
 from src.db.utils import deduplicate_table, ensure_utc_datetime
 from src.data_api.futures_api_client import CcdataFuturesApiClient
 from src.rate_limit_tracker import record_rate_limit_status
+from src.utils import get_end_of_previous_period
 
 # Load environment variables from .env file
 load_dotenv()
@@ -74,7 +75,8 @@ def get_futures_instruments_from_db(
             for row in results:
                 last_update_dt = ensure_utc_datetime(row[2])
                 first_update_dt = ensure_utc_datetime(row[3])
-                instruments.append((row[0], row[1], last_update_dt, first_update_dt))
+                instrument_status = row[4]
+                instruments.append((row[0], row[1], last_update_dt, first_update_dt, instrument_status))
             logger.info(f"Found {len(instruments)} futures instruments in database.")
             return instruments
         else:
@@ -123,6 +125,7 @@ def ingest_minute_funding_rate_data_for_instrument(
     mapped_instrument: str,
     last_funding_rate_update_datetime: Optional[datetime],
     first_funding_rate_update_datetime: Optional[datetime],
+    instrument_status: str,
 ):
     """
     Fetches minute funding rate data for a specific futures instrument and ingests it into the database.
@@ -137,7 +140,7 @@ def ingest_minute_funding_rate_data_for_instrument(
     last_datetime_in_db = get_last_ingested_datetime(db, market, mapped_instrument)
 
     now_utc = datetime.now(timezone.utc)
-    one_minute_ago_utc = now_utc - timedelta(minutes=1)
+    end_of_previous_minute = get_end_of_previous_period(now_utc, "minutes")
     
     # Determine the start datetime for fetching
     if last_datetime_in_db:
@@ -161,10 +164,13 @@ def ingest_minute_funding_rate_data_for_instrument(
             )
 
     # Determine the effective end timestamp for fetching
-    # This is the minimum of one minute ago and the instrument's last funding rate update datetime
-    effective_to_ts_datetime = one_minute_ago_utc
-    if last_funding_rate_update_datetime and last_funding_rate_update_datetime < one_minute_ago_utc:
-        effective_to_ts_datetime = last_funding_rate_update_datetime
+    # This is the minimum of the end of the previous minute and the instrument's last funding rate update datetime
+    # Determine the effective end timestamp for fetching
+    # If the instrument is active, use the end of the previous minute. Otherwise, use the last update datetime from the database.
+    if instrument_status == "ACTIVE":
+        effective_to_ts_datetime = end_of_previous_minute
+    else:
+        effective_to_ts_datetime = last_funding_rate_update_datetime if last_funding_rate_update_datetime else end_of_previous_minute
 
     current_to_ts = int(effective_to_ts_datetime.timestamp())
     
@@ -330,9 +336,9 @@ def main():
             logger.error("No futures instruments found for the given criteria. Aborting.")
             return
 
-    for market, mapped_instrument, last_funding_rate_update_datetime, first_funding_rate_update_datetime in instruments_to_process:
+    for market, mapped_instrument, last_funding_rate_update_datetime, first_funding_rate_update_datetime, instrument_status in instruments_to_process:
         ingest_minute_funding_rate_data_for_instrument(
-            futures_api_client, db_connection, market, mapped_instrument, last_funding_rate_update_datetime, first_funding_rate_update_datetime
+            futures_api_client, db_connection, market, mapped_instrument, last_funding_rate_update_datetime, first_funding_rate_update_datetime, instrument_status
         )
         time.sleep(0.1)  # Small delay to avoid hitting API rate limits too quickly
 

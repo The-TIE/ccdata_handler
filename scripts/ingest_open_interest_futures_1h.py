@@ -10,6 +10,7 @@ from src.db.connection import DbConnectionManager
 from src.db.utils import deduplicate_table, ensure_utc_datetime
 from src.data_api.futures_api_client import CcdataFuturesApiClient
 from src.rate_limit_tracker import record_rate_limit_status
+from src.utils import get_end_of_previous_period
 
 # Load environment variables from .env file
 load_dotenv()
@@ -137,7 +138,7 @@ def ingest_hourly_open_interest_data_for_instrument(
     last_datetime_in_db = get_last_ingested_datetime(db, market, mapped_instrument)
 
     now_utc = datetime.now(timezone.utc)
-    one_hour_ago_utc = now_utc - timedelta(hours=1)
+    end_of_previous_hour = get_end_of_previous_period(now_utc, "hours")
     
     # Determine the start datetime for fetching
     if last_datetime_in_db:
@@ -161,9 +162,9 @@ def ingest_hourly_open_interest_data_for_instrument(
             )
 
     # Determine the effective end timestamp for fetching
-    # This is the minimum of one hour ago and the instrument's last open interest update datetime
-    effective_to_ts_datetime = one_hour_ago_utc
-    if last_open_interest_update_datetime and last_open_interest_update_datetime < one_hour_ago_utc:
+    # This is the minimum of the end of the previous hour and the instrument's last open interest update datetime
+    effective_to_ts_datetime = end_of_previous_hour
+    if last_open_interest_update_datetime and last_open_interest_update_datetime < end_of_previous_hour:
         effective_to_ts_datetime = last_open_interest_update_datetime
 
     current_to_ts = int(effective_to_ts_datetime.timestamp())
