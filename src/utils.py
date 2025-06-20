@@ -17,3 +17,16 @@ def get_end_of_previous_period(dt: datetime, interval: str) -> datetime:
         return (dt.replace(second=0, microsecond=0) - timedelta(microseconds=1))
     else:
         raise ValueError(f"Unsupported interval: {interval}")
+
+def map_interval_to_unit(interval: str) -> str:
+    """
+    Maps an interval string (e.g., '1d', '1h', '1m') to its corresponding unit string (e.g., 'days', 'hours', 'minutes').
+    """
+    if interval == "1d":
+        return "days"
+    elif interval == "1h":
+        return "hours"
+    elif interval == "1m":
+        return "minutes"
+    else:
+        raise ValueError(f"Unsupported interval format: {interval}")
