@@ -382,7 +382,7 @@ class FuturesIngestor:
                 logger.info(f"Reached end of available new data for {mapped_instrument} on {market}.")
                 break
 
-    def run_ingestion(self, exchanges: Optional[List[str]], instruments: Optional[List[str]], instrument_statuses: List[str]):
+    def run_ingestion(self, exchanges: Optional[List[str]], instruments: Optional[List[str]], instrument_statuses: List[str], deduplicate:bool = False):
         """
         Main method to run the data ingestion process.
         """
@@ -432,9 +432,10 @@ class FuturesIngestor:
         # Add deduplication step after ingestion
         key_cols = ["datetime", "market", "mapped_instrument"]
         latest_col = self.data_type_config["deduplicate_latest_col"]
-        logger.info(f"De-duplicating {self.table_name}...")
-        deduplicate_table(self.db_connection, self.table_name, key_cols, latest_col)
-        logger.info("De-duplication Complete")
+        if deduplicate:
+            logger.info(f"De-duplicating {self.table_name}...")
+            deduplicate_table(self.db_connection, self.table_name, key_cols, latest_col)
+            logger.info("De-duplication Complete")
 
         self.db_connection.close_connection()
         logger.info(f"{self.data_type} futures data ingestion for interval {self.interval} completed.")
