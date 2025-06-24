@@ -36,6 +36,7 @@ CREATE TABLE
         `volume_unknown` DOUBLE,
         `quote_volume_unknown` DOUBLE,
         `collected_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (`datetime`, `exchange`, `symbol`),
         SHARD KEY (`datetime`, `exchange`, `symbol`),
         SORT KEY (`datetime`, `exchange`, `symbol`)
     );
@@ -70,6 +71,7 @@ CREATE TABLE
         `volume_top_tier_direct` DOUBLE,
         `quote_volume_top_tier_direct` DOUBLE,
         `collected_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (`datetime`, `market`, `asset`),
         SHARD KEY (`datetime`, `market`, `asset`),
         SORT KEY (`datetime`, `market`, `asset`)
     );

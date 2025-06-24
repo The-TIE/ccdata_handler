@@ -33,7 +33,9 @@ def get_top_assets(db: DbConnectionManager, limit: int = 50) -> List[str]:
     """
     try:
         query = db._load_sql("get_top_assets.sql")
-        logger.info(f"Fetching top {limit} assets by SPOT_MOVING_30_DAY_QUOTE_VOLUME_USD from database...")
+        logger.info(
+            f"Fetching top {limit} assets by SPOT_MOVING_30_DAY_QUOTE_VOLUME_USD from database..."
+        )
         # Pass limit as a parameter to the SQL query
         results = db._execute_query(query, params=(limit,), fetch=True)
         if results:
@@ -92,7 +94,9 @@ def get_trading_pairs_from_db(
         # Pass exchanges and assets as a tuple for the IN clauses
         params = (exchanges, assets)
 
-        logger.info("Fetching trading pairs for top assets on qualified exchanges from database...")
+        logger.info(
+            "Fetching trading pairs for top assets on qualified exchanges from database..."
+        )
         results = db._execute_query(query, params=params, fetch=True)
         if results:
             # Results are already in the desired (exchange, base_symbol, quote_symbol) format
@@ -154,7 +158,11 @@ def ingest_daily_ohlcv_data_for_pair(
 
     today_utc_date = datetime.now(timezone.utc).date()
     yesterday_utc_date = today_utc_date - timedelta(days=1)
-    to_ts = int(datetime.combine(yesterday_utc_date, datetime.max.time(), tzinfo=timezone.utc).timestamp())
+    to_ts = int(
+        datetime.combine(
+            yesterday_utc_date, datetime.max.time(), tzinfo=timezone.utc
+        ).timestamp()
+    )
     limit = None
     start_from_log_str = None
 
@@ -166,7 +174,7 @@ def ingest_daily_ohlcv_data_for_pair(
                 f"No new data needed for {instrument} on {exchange}. Last record is up to date (last ingested: {last_ingested_date})."
             )
             return
-        
+
         if last_ingested_date == yesterday_utc_date:
             start_date_to_fetch = last_datetime_in_db
             limit = 1
@@ -181,7 +189,7 @@ def ingest_daily_ohlcv_data_for_pair(
         )
     else:
         # Backfill 2 years if no data exists
-        two_years_ago = datetime.now(timezone.utc) - timedelta(days=2 * 365)
+        two_years_ago = datetime.now(timezone.utc) - timedelta(days=5000)
         limit = (yesterday_utc_date - two_years_ago.date()).days
         start_from_log_str = two_years_ago.strftime("%Y-%m-%d %H:%M:%S UTC")
         logger.info(
@@ -222,13 +230,37 @@ def ingest_daily_ohlcv_data_for_pair(
                             "high": entry.get("HIGH"),
                             "low": entry.get("LOW"),
                             "close": entry.get("CLOSE"),
-                            "first_trade_timestamp": datetime.fromtimestamp(entry.get("FIRST_TRADE_TIMESTAMP"), tz=timezone.utc) if entry.get("FIRST_TRADE_TIMESTAMP") is not None else None, # Convert to DATETIME
-                            "last_trade_timestamp": datetime.fromtimestamp(entry.get("LAST_TRADE_TIMESTAMP"), tz=timezone.utc) if entry.get("LAST_TRADE_TIMESTAMP") is not None else None,   # Convert to DATETIME
+                            "first_trade_timestamp": (
+                                datetime.fromtimestamp(
+                                    entry.get("FIRST_TRADE_TIMESTAMP"), tz=timezone.utc
+                                )
+                                if entry.get("FIRST_TRADE_TIMESTAMP") is not None
+                                else None
+                            ),  # Convert to DATETIME
+                            "last_trade_timestamp": (
+                                datetime.fromtimestamp(
+                                    entry.get("LAST_TRADE_TIMESTAMP"), tz=timezone.utc
+                                )
+                                if entry.get("LAST_TRADE_TIMESTAMP") is not None
+                                else None
+                            ),  # Convert to DATETIME
                             "first_trade_price": entry.get("FIRST_TRADE_PRICE"),
                             "high_trade_price": entry.get("HIGH_TRADE_PRICE"),
-                            "high_trade_timestamp": datetime.fromtimestamp(entry.get("HIGH_TRADE_TIMESTAMP"), tz=timezone.utc) if entry.get("HIGH_TRADE_TIMESTAMP") is not None else None, # Convert to DATETIME
+                            "high_trade_timestamp": (
+                                datetime.fromtimestamp(
+                                    entry.get("HIGH_TRADE_TIMESTAMP"), tz=timezone.utc
+                                )
+                                if entry.get("HIGH_TRADE_TIMESTAMP") is not None
+                                else None
+                            ),  # Convert to DATETIME
                             "low_trade_price": entry.get("LOW_TRADE_PRICE"),
-                            "low_trade_timestamp": datetime.fromtimestamp(entry.get("LOW_TRADE_TIMESTAMP"), tz=timezone.utc) if entry.get("LOW_TRADE_TIMESTAMP") is not None else None,   # Convert to DATETIME
+                            "low_trade_timestamp": (
+                                datetime.fromtimestamp(
+                                    entry.get("LOW_TRADE_TIMESTAMP"), tz=timezone.utc
+                                )
+                                if entry.get("LOW_TRADE_TIMESTAMP") is not None
+                                else None
+                            ),  # Convert to DATETIME
                             "last_trade_price": entry.get("LAST_TRADE_PRICE"),
                             "total_trades": entry.get("TOTAL_TRADES"),
                             "total_trades_buy": entry.get("TOTAL_TRADES_BUY"),
@@ -319,7 +351,9 @@ def main():
         db_connection, top_assets, qualified_exchanges
     )
     if not trading_pairs:
-        logger.error("No trading pairs found in database for the given criteria. Aborting.")
+        logger.error(
+            "No trading pairs found in database for the given criteria. Aborting."
+        )
         return
 
     # Apply pair limit if specified
@@ -339,7 +373,7 @@ def main():
     table_name = "market.cc_ohlcv_spot_1d_raw"
     key_cols = ["datetime", "exchange", "symbol_unmapped"]
     latest_col = "collected_at"
-    deduplicate_table(db_connection, table_name, key_cols, latest_col)
+    # deduplicate_table(db_connection, table_name, key_cols, latest_col)
 
     db_connection.close_connection()
     logger.info(

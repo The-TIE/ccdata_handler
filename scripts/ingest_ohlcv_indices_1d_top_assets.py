@@ -92,7 +92,11 @@ def ingest_daily_ohlcv_data_for_asset(
 
     today_utc_date = datetime.now(timezone.utc).date()
     yesterday_utc_date = today_utc_date - timedelta(days=1)
-    to_ts = int(datetime.combine(yesterday_utc_date, datetime.max.time(), tzinfo=timezone.utc).timestamp())
+    to_ts = int(
+        datetime.combine(
+            yesterday_utc_date, datetime.max.time(), tzinfo=timezone.utc
+        ).timestamp()
+    )
     limit = None
     start_from_log_str = None
 
@@ -104,7 +108,7 @@ def ingest_daily_ohlcv_data_for_asset(
                 f"No new data needed for {instrument} on {market}. Last record is up to date (last ingested: {last_ingested_date})."
             )
             return
-        
+
         if last_ingested_date == yesterday_utc_date:
             start_date_to_fetch = last_datetime_in_db
             limit = 1
@@ -157,13 +161,38 @@ def ingest_daily_ohlcv_data_for_asset(
                             "high": entry.get("HIGH"),
                             "low": entry.get("LOW"),
                             "close": entry.get("CLOSE"),
-                            "first_message_timestamp": datetime.fromtimestamp(entry.get("FIRST_MESSAGE_TIMESTAMP"), tz=timezone.utc) if entry.get("FIRST_MESSAGE_TIMESTAMP") is not None else None,
-                            "last_message_timestamp": datetime.fromtimestamp(entry.get("LAST_MESSAGE_TIMESTAMP"), tz=timezone.utc) if entry.get("LAST_MESSAGE_TIMESTAMP") is not None else None,
+                            "first_message_timestamp": (
+                                datetime.fromtimestamp(
+                                    entry.get("FIRST_MESSAGE_TIMESTAMP"),
+                                    tz=timezone.utc,
+                                )
+                                if entry.get("FIRST_MESSAGE_TIMESTAMP") is not None
+                                else None
+                            ),
+                            "last_message_timestamp": (
+                                datetime.fromtimestamp(
+                                    entry.get("LAST_MESSAGE_TIMESTAMP"), tz=timezone.utc
+                                )
+                                if entry.get("LAST_MESSAGE_TIMESTAMP") is not None
+                                else None
+                            ),
                             "first_message_value": entry.get("FIRST_MESSAGE_VALUE"),
                             "high_message_value": entry.get("HIGH_MESSAGE_VALUE"),
-                            "high_message_timestamp": datetime.fromtimestamp(entry.get("HIGH_MESSAGE_TIMESTAMP"), tz=timezone.utc) if entry.get("HIGH_MESSAGE_TIMESTAMP") is not None else None,
+                            "high_message_timestamp": (
+                                datetime.fromtimestamp(
+                                    entry.get("HIGH_MESSAGE_TIMESTAMP"), tz=timezone.utc
+                                )
+                                if entry.get("HIGH_MESSAGE_TIMESTAMP") is not None
+                                else None
+                            ),
                             "low_message_value": entry.get("LOW_MESSAGE_VALUE"),
-                            "low_message_timestamp": datetime.fromtimestamp(entry.get("LOW_MESSAGE_TIMESTAMP"), tz=timezone.utc) if entry.get("LOW_MESSAGE_TIMESTAMP") is not None else None,
+                            "low_message_timestamp": (
+                                datetime.fromtimestamp(
+                                    entry.get("LOW_MESSAGE_TIMESTAMP"), tz=timezone.utc
+                                )
+                                if entry.get("LOW_MESSAGE_TIMESTAMP") is not None
+                                else None
+                            ),
                             "last_message_value": entry.get("LAST_MESSAGE_VALUE"),
                             "total_index_updates": entry.get("TOTAL_INDEX_UPDATES"),
                             "volume": entry.get("VOLUME"),
@@ -246,7 +275,7 @@ def main():
     table_name = "market.cc_ohlcv_spot_indices_1d_raw"
     key_cols = ["datetime", "asset"]
     latest_col = "collected_at"
-    deduplicate_table(db_connection, table_name, key_cols, latest_col)
+    # deduplicate_table(db_connection, table_name, key_cols, latest_col)
 
     db_connection.close_connection()
     logger.info("Daily OHLCV indices data ingestion for top assets completed.")
