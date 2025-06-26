@@ -132,6 +132,16 @@ class DbConnectionManager:
                 logger.exception(f"Error closing database connection: {e}")
         self.conn = None
 
+    @property
+    def connection_uri(self) -> str:
+        """
+        Returns the connection URI for use with tools like Polars' read_database_uri.
+        Example: 'mysql://user:password@host:port/database'
+        """
+        if not all([self.user, self.password, self.host, self.port, self.database]):
+            raise ValueError("Missing connection parameters to form URI.")
+        return f"mysql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
+
     def _reconnect(self, attempt: int = 1, max_attempts: int = 2):
         """Attempts to close the current connection and establish a new one."""
         logger.warning(
@@ -359,7 +369,11 @@ class DbConnectionManager:
             raise ConnectionError("_execute_many failed, unknown reason after retries.")
 
     def insert_dataframe(
-        self, records: List[dict], table_name: str, replace: bool = False, schema: Optional[dict] = None
+        self,
+        records: List[dict],
+        table_name: str,
+        replace: bool = False,
+        schema: Optional[dict] = None,
     ) -> int:
         """
         Inserts a list of dictionaries (records) into the specified table.

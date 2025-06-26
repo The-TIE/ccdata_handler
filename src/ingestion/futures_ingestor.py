@@ -11,12 +11,17 @@ from src.db.utils import deduplicate_table, ensure_utc_datetime
 from src.data_api.futures_api_client import CcdataFuturesApiClient
 from src.rate_limit_tracker import record_rate_limit_status
 from src.utils import get_end_of_previous_period, map_interval_to_unit
-from src.polars_schemas import get_futures_ohlcv_schema, get_futures_funding_rate_schema, get_futures_open_interest_schema
+from src.polars_schemas import (
+    get_futures_ohlcv_schema,
+    get_futures_funding_rate_schema,
+    get_futures_open_interest_schema,
+)
 
 logger = setup_logger(
     __name__,
     log_file_path=os.path.join(LOG_DIR, "futures_ingestor.log"),
 )
+
 
 class FuturesIngestor:
     """
@@ -62,7 +67,9 @@ class FuturesIngestor:
     }
 
     def __init__(self, data_type: str, interval: str):
-        logger.debug(f"FuturesIngestor initialized with data_type: {data_type}, interval: '{interval}'")
+        logger.debug(
+            f"FuturesIngestor initialized with data_type: {data_type}, interval: '{interval}'"
+        )
         if data_type not in self.CONFIG:
             raise ValueError(f"Unsupported data_type: {data_type}")
         if interval not in ["1d", "1h", "1m"]:
@@ -73,9 +80,13 @@ class FuturesIngestor:
         self.interval = interval
         self.db_connection = DbConnectionManager()
         self.futures_api_client = CcdataFuturesApiClient()
-        self.table_name = self.data_type_config["db_table_template"].format(interval=interval)
+        self.table_name = self.data_type_config["db_table_template"].format(
+            interval=interval
+        )
         self.record_mapper = getattr(self, self.data_type_config["record_mapper"])
-        self.max_limit_per_call = self.data_type_config["max_limit_per_call"][self.interval]
+        self.max_limit_per_call = self.data_type_config["max_limit_per_call"][
+            self.interval
+        ]
         self.schema_getter = self.data_type_config["schema_getter"]
 
     def _get_all_futures_exchanges(self) -> List[str]:
@@ -113,13 +124,17 @@ class FuturesIngestor:
             return []
 
         try:
-            query = self.db_connection._load_sql(self.data_type_config["get_instruments_sql"])
+            query = self.db_connection._load_sql(
+                self.data_type_config["get_instruments_sql"]
+            )
             params = (tuple(exchanges), tuple(instrument_statuses))
 
             logger.info(
                 f"Fetching futures instruments for exchanges: {exchanges} with statuses: {instrument_statuses}..."
             )
-            results = self.db_connection._execute_query(query, params=params, fetch=True)
+            results = self.db_connection._execute_query(
+                query, params=params, fetch=True
+            )
             if results:
                 instruments = []
                 for row in results:
@@ -127,8 +142,18 @@ class FuturesIngestor:
                     last_update_dt = ensure_utc_datetime(row[2])
                     first_update_dt = ensure_utc_datetime(row[3])
                     instrument_status = row[4]
-                    instruments.append((row[0], row[1], last_update_dt, first_update_dt, instrument_status))
-                logger.info(f"Found {len(instruments)} futures instruments in database.")
+                    instruments.append(
+                        (
+                            row[0],
+                            row[1],
+                            last_update_dt,
+                            first_update_dt,
+                            instrument_status,
+                        )
+                    )
+                logger.info(
+                    f"Found {len(instruments)} futures instruments in database."
+                )
                 return instruments
             else:
                 logger.warning(
@@ -136,7 +161,9 @@ class FuturesIngestor:
                 )
                 return []
         except FileNotFoundError:
-            logger.error(f"SQL script '{self.data_type_config['get_instruments_sql']}' not found.")
+            logger.error(
+                f"SQL script '{self.data_type_config['get_instruments_sql']}' not found."
+            )
             return []
         except Exception as e:
             logger.error(f"Error fetching futures instruments from database: {e}")
@@ -196,13 +223,37 @@ class FuturesIngestor:
             "total_trades_buy": entry.get("TOTAL_TRADES_BUY"),
             "total_trades_sell": entry.get("TOTAL_TRADES_SELL"),
             "total_trades_unknown": entry.get("TOTAL_TRADES_UNKNOWN"),
-            "first_trade_timestamp": datetime.fromtimestamp(entry.get("FIRST_TRADE_TIMESTAMP"), tz=timezone.utc) if entry.get("FIRST_TRADE_TIMESTAMP") is not None else None,
-            "last_trade_timestamp": datetime.fromtimestamp(entry.get("LAST_TRADE_TIMESTAMP"), tz=timezone.utc) if entry.get("LAST_TRADE_TIMESTAMP") is not None else None,
+            "first_trade_timestamp": (
+                datetime.fromtimestamp(
+                    entry.get("FIRST_TRADE_TIMESTAMP"), tz=timezone.utc
+                )
+                if entry.get("FIRST_TRADE_TIMESTAMP") is not None
+                else None
+            ),
+            "last_trade_timestamp": (
+                datetime.fromtimestamp(
+                    entry.get("LAST_TRADE_TIMESTAMP"), tz=timezone.utc
+                )
+                if entry.get("LAST_TRADE_TIMESTAMP") is not None
+                else None
+            ),
             "first_trade_price": entry.get("FIRST_TRADE_PRICE"),
             "high_trade_price": entry.get("HIGH_TRADE_PRICE"),
-            "high_trade_timestamp": datetime.fromtimestamp(entry.get("HIGH_TRADE_TIMESTAMP"), tz=timezone.utc) if entry.get("HIGH_TRADE_TIMESTAMP") is not None else None,
+            "high_trade_timestamp": (
+                datetime.fromtimestamp(
+                    entry.get("HIGH_TRADE_TIMESTAMP"), tz=timezone.utc
+                )
+                if entry.get("HIGH_TRADE_TIMESTAMP") is not None
+                else None
+            ),
             "low_trade_price": entry.get("LOW_TRADE_PRICE"),
-            "low_trade_timestamp": datetime.fromtimestamp(entry.get("LOW_TRADE_TIMESTAMP"), tz=timezone.utc) if entry.get("LOW_TRADE_TIMESTAMP") is not None else None,
+            "low_trade_timestamp": (
+                datetime.fromtimestamp(
+                    entry.get("LOW_TRADE_TIMESTAMP"), tz=timezone.utc
+                )
+                if entry.get("LOW_TRADE_TIMESTAMP") is not None
+                else None
+            ),
             "last_trade_price": entry.get("LAST_TRADE_PRICE"),
             "collected_at": datetime.now(timezone.utc),
         }
@@ -276,14 +327,20 @@ class FuturesIngestor:
         Fetches historical data for a specific futures instrument and ingests it into the database.
         Handles backfilling and live ingestion by paginating through available data.
         """
-        last_datetime_in_db = self._get_last_ingested_datetime(market, mapped_instrument)
+        last_datetime_in_db = self._get_last_ingested_datetime(
+            market, mapped_instrument
+        )
 
         today_utc = datetime.now(timezone.utc)
-        end_of_previous_period = get_end_of_previous_period(today_utc, map_interval_to_unit(self.interval))
+        end_of_previous_period = get_end_of_previous_period(
+            today_utc, map_interval_to_unit(self.interval)
+        )
 
         # Determine the start date for fetching
         if last_datetime_in_db:
-            start_date_to_fetch = last_datetime_in_db + timedelta(**{map_interval_to_unit(self.interval): 1})
+            start_date_to_fetch = last_datetime_in_db + timedelta(
+                **{map_interval_to_unit(self.interval): 1}
+            )
             logger.info(
                 f"Continuing ingestion for {mapped_instrument} on {market} from {start_date_to_fetch.strftime('%Y-%m-%d %H:%M:%S UTC')}."
             )
@@ -295,8 +352,12 @@ class FuturesIngestor:
                 )
             else:
                 # Fallback to 2 years ago if first_update_datetime is not available
-                two_years_ago = datetime.now(timezone.utc) - timedelta(days=self.max_limit_per_call)
-                start_date_to_fetch = datetime.combine(two_years_ago.date(), datetime.min.time(), tzinfo=timezone.utc)
+                two_years_ago = datetime.now(timezone.utc) - timedelta(
+                    days=self.max_limit_per_call
+                )
+                start_date_to_fetch = datetime.combine(
+                    two_years_ago.date(), datetime.min.time(), tzinfo=timezone.utc
+                )
                 logger.info(
                     f"No existing data for {mapped_instrument} on {market} and no first update datetime. Backfilling from {start_date_to_fetch.strftime('%Y-%m-%d %H:%M:%S UTC')}."
                 )
@@ -305,28 +366,42 @@ class FuturesIngestor:
         if instrument_status == "ACTIVE":
             effective_to_ts_dt = end_of_previous_period
         else:
-            effective_to_ts_dt = last_update_datetime if last_update_datetime else end_of_previous_period
+            effective_to_ts_dt = (
+                last_update_datetime if last_update_datetime else end_of_previous_period
+            )
 
         current_to_ts = int(effective_to_ts_dt.timestamp())
-        
+
         while True:
             # Calculate the number of periods between start_date_to_fetch and effective_to_ts_dt
             if self.interval == "1d":
-                delta_periods = (effective_to_ts_dt.date() - start_date_to_fetch.date()).days
+                delta_periods = (
+                    effective_to_ts_dt.date() - start_date_to_fetch.date()
+                ).days
             elif self.interval == "1h":
-                delta_periods = int((effective_to_ts_dt - start_date_to_fetch).total_seconds() / 3600)
+                delta_periods = int(
+                    (effective_to_ts_dt - start_date_to_fetch).total_seconds() / 3600
+                )
             elif self.interval == "1m":
-                delta_periods = int((effective_to_ts_dt - start_date_to_fetch).total_seconds() / 60)
+                delta_periods = int(
+                    (effective_to_ts_dt - start_date_to_fetch).total_seconds() / 60
+                )
             else:
-                raise ValueError(f"Unsupported interval for delta_periods: {self.interval}")
+                raise ValueError(
+                    f"Unsupported interval for delta_periods: {self.interval}"
+                )
 
             if delta_periods < 0:
-                logger.info(f"No new data to fetch for {mapped_instrument} on {market}. Already up to date or future date requested.")
+                logger.info(
+                    f"No new data to fetch for {mapped_instrument} on {market}. Already up to date or future date requested."
+                )
                 break
 
             limit = min(delta_periods + 1, self.max_limit_per_call)
-            
-            batch_to_ts_dt = start_date_to_fetch + timedelta(**{map_interval_to_unit(self.interval): limit - 1})
+
+            batch_to_ts_dt = start_date_to_fetch + timedelta(
+                **{map_interval_to_unit(self.interval): limit - 1}
+            )
 
             batch_to_ts = int(batch_to_ts_dt.timestamp())
             if batch_to_ts > current_to_ts:
@@ -337,7 +412,9 @@ class FuturesIngestor:
             )
 
             try:
-                api_call_method = getattr(self.futures_api_client, self.data_type_config["api_method"])
+                api_call_method = getattr(
+                    self.futures_api_client, self.data_type_config["api_method"]
+                )
                 data = api_call_method(
                     interval=map_interval_to_unit(self.interval),
                     market=market,
@@ -349,23 +426,47 @@ class FuturesIngestor:
                 if data and data.get("Data"):
                     records = []
                     for entry in data["Data"]:
-                        entry_datetime = datetime.fromtimestamp(entry["TIMESTAMP"], tz=timezone.utc)
-                        if not last_datetime_in_db or entry_datetime > last_datetime_in_db:
+                        entry_datetime = datetime.fromtimestamp(
+                            entry["TIMESTAMP"], tz=timezone.utc
+                        )
+                        if (
+                            not last_datetime_in_db
+                            or entry_datetime > last_datetime_in_db
+                        ):
                             records.append(self.record_mapper(entry))
-                    
+
                     if records:
                         schema = self.schema_getter() if self.schema_getter else None
-                        self.db_connection.insert_dataframe(records, self.table_name, replace=True, schema=schema)
+                        self.db_connection.insert_dataframe(
+                            records, self.table_name, replace=True, schema=schema
+                        )
                         logger.info(
                             f"Successfully ingested {len(records)} {self.data_type} records for {mapped_instrument} on {market}."
                         )
-                        last_datetime_in_db = max(records, key=lambda x: x['datetime'])['datetime']
+                        last_datetime_in_db = max(records, key=lambda x: x["datetime"])[
+                            "datetime"
+                        ]
                     else:
                         logger.info(
                             f"No new {self.data_type} data to ingest for {mapped_instrument} on {market} in this batch."
                         )
+
+                    # Always advance start_date_to_fetch to avoid re-fetching the same data
+                    start_date_to_fetch = batch_to_ts_dt + timedelta(
+                        **{map_interval_to_unit(self.interval): 1}
+                    )
+
                 else:
-                    logger.warning(f"No data received for {mapped_instrument} on {market} for this batch.")
+                    logger.warning(
+                        f"No data received for {mapped_instrument} on {market} for this batch."
+                    )
+
+                # Break if start_date_to_fetch has passed the effective_to_ts_dt
+                if start_date_to_fetch > effective_to_ts_dt:
+                    logger.info(
+                        f"Finished ingesting data for {mapped_instrument} on {market}. Reached effective_to_ts_dt."
+                    )
+                    break
             except Exception as e:
                 logger.error(
                     f"Error ingesting {self.data_type} data for {mapped_instrument} on {market}: {e}"
@@ -373,21 +474,35 @@ class FuturesIngestor:
                 break
 
             # Prepare for the next batch
-            start_date_to_fetch = datetime.fromtimestamp(batch_to_ts, tz=timezone.utc) + timedelta(**{map_interval_to_unit(self.interval): 1})
+            start_date_to_fetch = datetime.fromtimestamp(
+                batch_to_ts, tz=timezone.utc
+            ) + timedelta(**{map_interval_to_unit(self.interval): 1})
 
             if start_date_to_fetch > today_utc:
                 break
 
             if last_datetime_in_db and start_date_to_fetch <= last_datetime_in_db:
-                logger.info(f"Reached end of available new data for {mapped_instrument} on {market}.")
+                logger.info(
+                    f"Reached end of available new data for {mapped_instrument} on {market}."
+                )
                 break
 
-    def run_ingestion(self, exchanges: Optional[List[str]], instruments: Optional[List[str]], instrument_statuses: List[str], deduplicate:bool = False):
+    def run_ingestion(
+        self,
+        exchanges: Optional[List[str]],
+        instruments: Optional[List[str]],
+        instrument_statuses: List[str],
+        deduplicate: bool = False,
+    ):
         """
         Main method to run the data ingestion process.
         """
-        logger.info(f"Attempting to ingest {self.data_type} futures data for interval {self.interval}...")
-        record_rate_limit_status(f"ingest_{self.data_type}_futures_{self.interval}", "pre")
+        logger.info(
+            f"Attempting to ingest {self.data_type} futures data for interval {self.interval}..."
+        )
+        record_rate_limit_status(
+            f"ingest_{self.data_type}_futures_{self.interval}", "pre"
+        )
 
         # Determine exchanges to process
         if exchanges:
@@ -396,13 +511,17 @@ class FuturesIngestor:
         else:
             exchanges_to_process = self._get_all_futures_exchanges()
             if not exchanges_to_process:
-                logger.error("Failed to retrieve futures exchanges from database. Aborting.")
+                logger.error(
+                    "Failed to retrieve futures exchanges from database. Aborting."
+                )
                 return
 
         # Determine instruments to process
         instruments_to_process = []
         if instruments:
-            user_specified_instruments = [instrument.strip() for instrument in instruments]
+            user_specified_instruments = [
+                instrument.strip() for instrument in instruments
+            ]
             for exchange in exchanges_to_process:
                 fetched_instruments = self._get_futures_instruments_from_db(
                     [exchange], instrument_statuses
@@ -410,22 +529,38 @@ class FuturesIngestor:
                 for inst in fetched_instruments:
                     if inst[1] in user_specified_instruments:
                         instruments_to_process.append(inst)
-            
+
             if not instruments_to_process:
-                logger.error("No user-specified futures instruments found in the database for the given criteria. Aborting.")
+                logger.error(
+                    "No user-specified futures instruments found in the database for the given criteria. Aborting."
+                )
                 return
-            logger.info(f"Processing user-specified instruments: {instruments_to_process}")
+            logger.info(
+                f"Processing user-specified instruments: {instruments_to_process}"
+            )
         else:
             instruments_to_process = self._get_futures_instruments_from_db(
                 exchanges_to_process, instrument_statuses
             )
             if not instruments_to_process:
-                logger.error("No futures instruments found for the given criteria. Aborting.")
+                logger.error(
+                    "No futures instruments found for the given criteria. Aborting."
+                )
                 return
 
-        for market, mapped_instrument, last_update_dt, first_update_dt, instrument_status in instruments_to_process:
+        for (
+            market,
+            mapped_instrument,
+            last_update_dt,
+            first_update_dt,
+            instrument_status,
+        ) in instruments_to_process:
             self.ingest_data_for_instrument(
-                market, mapped_instrument, last_update_dt, first_update_dt, instrument_status
+                market,
+                mapped_instrument,
+                last_update_dt,
+                first_update_dt,
+                instrument_status,
             )
             time.sleep(0.1)
 
@@ -438,5 +573,9 @@ class FuturesIngestor:
             logger.info("De-duplication Complete")
 
         self.db_connection.close_connection()
-        logger.info(f"{self.data_type} futures data ingestion for interval {self.interval} completed.")
-        record_rate_limit_status(f"ingest_{self.data_type}_futures_{self.interval}", "post")
+        logger.info(
+            f"{self.data_type} futures data ingestion for interval {self.interval} completed."
+        )
+        record_rate_limit_status(
+            f"ingest_{self.data_type}_futures_{self.interval}", "post"
+        )
