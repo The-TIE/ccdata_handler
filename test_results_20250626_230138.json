@@ -1,0 +1,197 @@
+{
+  "timestamp": "2025-06-26T23:01:17.691210",
+  "overall_status": "failure",
+  "test_suites": {
+    "Framework Imports": {
+      "status": "success",
+      "tests": [
+        {
+          "name": "Configuration",
+          "status": "PASS",
+          "message": "Successfully imported src.ingestion.config"
+        },
+        {
+          "name": "Base Classes",
+          "status": "PASS",
+          "message": "Successfully imported src.ingestion.base"
+        },
+        {
+          "name": "Monitoring",
+          "status": "PASS",
+          "message": "Successfully imported src.ingestion.monitoring"
+        },
+        {
+          "name": "Cache Manager",
+          "status": "PASS",
+          "message": "Successfully imported src.ingestion.cache"
+        },
+        {
+          "name": "Utils",
+          "status": "PASS",
+          "message": "Successfully imported src.ingestion.utils"
+        },
+        {
+          "name": "Asset Metadata Ingestor",
+          "status": "PASS",
+          "message": "Successfully imported src.ingestion.ingestors.asset_metadata_ingestor"
+        },
+        {
+          "name": "Exchange Metadata Ingestor",
+          "status": "PASS",
+          "message": "Successfully imported src.ingestion.ingestors.exchange_metadata_ingestor"
+        },
+        {
+          "name": "Spot OHLCV Ingestor",
+          "status": "PASS",
+          "message": "Successfully imported src.ingestion.ingestors.spot_ohlcv_ingestor"
+        },
+        {
+          "name": "Futures Data Ingestor",
+          "status": "PASS",
+          "message": "Successfully imported src.ingestion.ingestors.futures_data_ingestor"
+        },
+        {
+          "name": "Indices OHLCV Ingestor",
+          "status": "PASS",
+          "message": "Successfully imported src.ingestion.ingestors.indices_ohlcv_ingestor"
+        },
+        {
+          "name": "Instrument Metadata Ingestor",
+          "status": "PASS",
+          "message": "Successfully imported src.ingestion.ingestors.instrument_metadata_ingestor"
+        },
+        {
+          "name": "API Clients",
+          "status": "PASS",
+          "message": "Successfully imported src.data_api.asset_api_client"
+        },
+        {
+          "name": "Database Connection",
+          "status": "PASS",
+          "message": "Successfully imported src.db.connection"
+        },
+        {
+          "name": "Logger Config",
+          "status": "PASS",
+          "message": "Successfully imported src.logger_config"
+        }
+      ],
+      "errors": []
+    },
+    "Configuration": {
+      "status": "failure",
+      "tests": [
+        {
+          "name": "Configuration Loading",
+          "status": "FAIL",
+          "message": "Failed to load configuration: 'IngestionConfigManager' object has no attribute 'environment'"
+        }
+      ],
+      "errors": [
+        "Configuration error: 'IngestionConfigManager' object has no attribute 'environment'"
+      ]
+    },
+    "CLI Tools": {
+      "status": "success",
+      "tests": [
+        {
+          "name": "Unified Ingest Help",
+          "status": "PASS",
+          "message": "CLI tool executed successfully"
+        },
+        {
+          "name": "Migration Helper Help",
+          "status": "PASS",
+          "message": "CLI tool executed successfully"
+        },
+        {
+          "name": "Asset Data V2 Help",
+          "status": "PASS",
+          "message": "CLI tool executed successfully"
+        }
+      ],
+      "errors": []
+    },
+    "Database Connection": {
+      "status": "failure",
+      "tests": [
+        {
+          "name": "Database Manager Initialization",
+          "status": "FAIL",
+          "message": "Failed to initialize database manager: argument of type 'DatabaseConfig' is not iterable"
+        }
+      ],
+      "errors": [
+        "Database initialization error: argument of type 'DatabaseConfig' is not iterable"
+      ]
+    },
+    "Ingestor Initialization": {
+      "status": "failure",
+      "tests": [
+        {
+          "name": "API Client Initialization",
+          "status": "PASS",
+          "message": "Asset API client initialized successfully"
+        },
+        {
+          "name": "Ingestor Initialization",
+          "status": "FAIL",
+          "message": "Failed to initialize ingestor: argument of type 'DatabaseConfig' is not iterable"
+        }
+      ],
+      "errors": [
+        "Ingestor initialization error: argument of type 'DatabaseConfig' is not iterable"
+      ]
+    },
+    "Framework Version": {
+      "status": "success",
+      "tests": [
+        {
+          "name": "Framework Version Info",
+          "status": "PASS",
+          "message": "pyproject.toml found with framework metadata"
+        },
+        {
+          "name": "Documentation - README_UNIFIED_INGESTION.md",
+          "status": "PASS",
+          "message": "README_UNIFIED_INGESTION.md documentation available"
+        },
+        {
+          "name": "Documentation - README.md",
+          "status": "PASS",
+          "message": "README.md documentation available"
+        }
+      ],
+      "errors": []
+    }
+  },
+  "summary": {
+    "total_tests": 24,
+    "passed": 21,
+    "failed": 3,
+    "skipped": 0,
+    "warnings": 0
+  },
+  "critical_issues": [
+    "Configuration error: 'IngestionConfigManager' object has no attribute 'environment'",
+    "Database initialization error: argument of type 'DatabaseConfig' is not iterable",
+    "Ingestor initialization error: argument of type 'DatabaseConfig' is not iterable",
+    "Database schema mismatch: 'datetime' column not found in market.cc_assets table",
+    "Asset metadata ingestor incorrectly expects datetime fields for metadata records",
+    "Unit test suite has 77 failures out of 314 tests (75% failure rate)",
+    "Async fixture configuration issues in test_async_db.py",
+    "Multiple test failures in base ingestor functionality"
+  ],
+  "recommendations": [
+    "Fix database schema mismatch by updating table schema or ingestor expectations",
+    "Review and fix asset metadata ingestor to handle metadata records correctly",
+    "Fix async test fixtures in test_async_db.py using @pytest_asyncio.fixture",
+    "Review and fix base ingestor test mocks and assertions",
+    "Update cache manager tests to handle Redis connection properly",
+    "Review monitoring module test expectations and fix metric collection",
+    "Consider implementing dry-run mode for all CLI commands",
+    "Add integration tests that don't require actual database connections",
+    "Implement proper error handling for missing database tables",
+    "Add validation for ingestor data type compatibility"
+  ]
+}

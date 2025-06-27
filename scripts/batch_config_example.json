@@ -1,0 +1,49 @@
+{
+    "description": "Example batch configuration for unified ingestion",
+    "operations": [
+        {
+            "data_type": "exchange_metadata",
+            "exchange_type": "all",
+            "full_refresh": false
+        },
+        {
+            "data_type": "asset_metadata",
+            "full_refresh": false
+        },
+        {
+            "data_type": "spot_instruments",
+            "exchanges": [
+                "coinbase",
+                "binance",
+                "kraken"
+            ]
+        },
+        {
+            "data_type": "futures_instruments",
+            "exchanges": [
+                "binance",
+                "bybit",
+                "okx"
+            ]
+        },
+        {
+            "data_type": "spot_ohlcv",
+            "interval": "1d",
+            "pair_limit": 50
+        },
+        {
+            "data_type": "futures_ohlcv",
+            "interval": "1d",
+            "exchanges": [
+                "binance",
+                "bybit"
+            ]
+        },
+        {
+            "data_type": "indices_ohlcv",
+            "interval": "1d",
+            "market": "cadli",
+            "asset_limit": 25
+        }
+    ]
+}
