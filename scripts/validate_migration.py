@@ -31,7 +31,8 @@ sys.path.insert(0, "src")
 from src.logger_config import setup_logger
 from src.db.connection import DbConnectionManager
 from src.ingestion.config import get_config
-from src.utils import format_timestamp
+
+# from src.utils import format_timestamp  # Not used, commented out
 
 # Configure logging
 logger = setup_logger(__name__, log_to_console=True)
@@ -633,7 +634,7 @@ class MigrationValidator:
                 )
                 report["table_validations"][table_name] = validation_result
 
-                # Count issues
+                # Count issues from validation_checks
                 for check_name, check_result in validation_result[
                     "validation_checks"
                 ].items():
@@ -646,6 +647,22 @@ class MigrationValidator:
                             report["validation_summary"]["overall_status"] == "passed"
                             and check_result.get("status") == "warning"
                         ):
+                            report["validation_summary"]["overall_status"] = "warning"
+
+                # Count issues from issues_found array
+                issues_found = validation_result.get("issues_found", [])
+                if issues_found:
+                    report["validation_summary"]["total_issues"] += len(issues_found)
+                    # Any issue in issues_found should be treated as failed
+                    for issue in issues_found:
+                        if issue.get("severity") == "high":
+                            report["validation_summary"]["overall_status"] = "failed"
+                        elif report["validation_summary"][
+                            "overall_status"
+                        ] == "passed" and issue.get("severity") in [
+                            "medium",
+                            "warning",
+                        ]:
                             report["validation_summary"]["overall_status"] = "warning"
 
             except Exception as e:
@@ -669,41 +686,72 @@ class MigrationValidator:
     def _generate_recommendations(self, table_validations: Dict[str, Any]) -> List[str]:
         """Generate recommendations based on validation results."""
         recommendations = []
+        has_issues = False
 
         for table_name, validation in table_validations.items():
-            if "validation_checks" not in validation:
-                continue
+            # Check for critical errors in issues_found
+            issues_found = validation.get("issues_found", [])
+            if issues_found:
+                has_issues = True
+                for issue in issues_found:
+                    if issue.get("type") == "validation_error":
+                        recommendations.append(
+                            f"Table {table_name}: CRITICAL ERROR - {issue.get('message', 'Unknown error')}"
+                        )
+                    else:
+                        recommendations.append(
+                            f"Table {table_name}: {issue.get('type', 'Issue')}: {issue.get('message', 'Unknown issue')}"
+                        )
 
-            checks = validation["validation_checks"]
-
-            # Null value recommendations
-            if checks.get("null_value_check", {}).get("status") == "failed":
+            # Check for errors in validation status
+            if validation.get("status") == "error":
+                has_issues = True
                 recommendations.append(
-                    f"Table {table_name}: Implement data validation to prevent null values in critical columns"
+                    f"Table {table_name}: VALIDATION FAILED - {validation.get('error', 'Unknown error')}"
                 )
 
-            # Duplicate recommendations
-            if checks.get("duplicate_check", {}).get("status") in ["warning", "failed"]:
-                recommendations.append(
-                    f"Table {table_name}: Review data ingestion process to prevent duplicate records"
-                )
+            # Check validation_checks if they exist
+            if "validation_checks" in validation:
+                checks = validation["validation_checks"]
 
-            # Freshness recommendations
-            if checks.get("freshness_check", {}).get("status") in ["warning", "failed"]:
-                recommendations.append(
-                    f"Table {table_name}: Check data ingestion schedule and API connectivity"
-                )
+                # Null value recommendations
+                if checks.get("null_value_check", {}).get("status") == "failed":
+                    has_issues = True
+                    recommendations.append(
+                        f"Table {table_name}: Implement data validation to prevent null values in critical columns"
+                    )
 
-            # Consistency recommendations
-            if checks.get("consistency_check", {}).get("status") in [
-                "warning",
-                "failed",
-            ]:
-                recommendations.append(
-                    f"Table {table_name}: Implement data validation rules for price/volume consistency"
-                )
+                # Duplicate recommendations
+                if checks.get("duplicate_check", {}).get("status") in [
+                    "warning",
+                    "failed",
+                ]:
+                    has_issues = True
+                    recommendations.append(
+                        f"Table {table_name}: Review data ingestion process to prevent duplicate records"
+                    )
 
-        if not recommendations:
+                # Freshness recommendations
+                if checks.get("freshness_check", {}).get("status") in [
+                    "warning",
+                    "failed",
+                ]:
+                    has_issues = True
+                    recommendations.append(
+                        f"Table {table_name}: Check data ingestion schedule and API connectivity"
+                    )
+
+                # Consistency recommendations
+                if checks.get("consistency_check", {}).get("status") in [
+                    "warning",
+                    "failed",
+                ]:
+                    has_issues = True
+                    recommendations.append(
+                        f"Table {table_name}: Implement data validation rules for price/volume consistency"
+                    )
+
+        if not has_issues:
             recommendations.append("All validations passed. Data quality is excellent!")
 
         return recommendations

@@ -1,10 +1,9 @@
--- Get trading pairs for specified assets on specified exchanges
+-- Get top trading pairs ordered by volume or activity
 SELECT
-    cis.exchange_internal_name,
-    cis.base_asset_symbol,
-    cis.quote_asset_symbol
+    cis.exchange_internal_name as market,
+    CONCAT(cis.base_asset_symbol, '-', cis.quote_asset_symbol) as instrument
 FROM market.cc_instruments_spot cis
 JOIN market.cc_assets ca ON cis.base_asset_id = ca.asset_id
-WHERE cis.exchange_internal_name IN %s
-  AND cis.base_asset_symbol IN %s
-  AND cis.instrument_status_on_exchange = 'ACTIVE'; -- Only fetch active instruments
+WHERE cis.instrument_status_on_exchange = 'ACTIVE'
+ORDER BY ca.asset_id ASC  -- Simple ordering by asset_id for now
+LIMIT %s;

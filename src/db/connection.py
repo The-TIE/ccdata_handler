@@ -4,7 +4,7 @@ import os
 import logging
 import tempfile
 import polars as pl  # Import polars for type hinting
-from typing import Optional, List, Tuple, Any
+from typing import Optional, List, Tuple, Any, Dict
 from dotenv import load_dotenv, find_dotenv, dotenv_values
 from pathlib import Path
 
@@ -559,6 +559,68 @@ class DbConnectionManager:
                     logger.error(
                         f"Error removing temporary CSV file {csv_path}: {unlink_e}"
                     )
+
+    def execute_query(
+        self,
+        query: str,
+        params: Optional[Any] = None,
+        commit: bool = False,
+        fetch: bool = True,
+    ) -> Optional[List[Dict[str, Any]]]:
+        """
+        Public method to execute a query with error handling.
+
+        This method provides a public interface to the private _execute_query method
+        and converts results to a list of dictionaries for easier consumption.
+
+        Args:
+            query (str): The SQL query string.
+            params (Optional[tuple]): Parameters for the query.
+            commit (bool): Whether to commit the transaction (for INSERT/UPDATE/DELETE).
+            fetch (bool): Whether to fetch results (for SELECT).
+
+        Returns:
+            Optional[List[Dict[str, Any]]]: Results as list of dictionaries if fetch=True, otherwise None.
+
+        Raises:
+            ConnectionError: If the database connection is not available.
+            Exception: If any database error occurs.
+        """
+        # Call the private method to get raw results
+        raw_results = self._execute_query(query, params, commit, fetch)
+
+        if not fetch or raw_results is None:
+            return raw_results
+
+        # Convert tuple results to dictionaries
+        if raw_results and isinstance(raw_results, list) and len(raw_results) > 0:
+            # Get column names from the cursor description
+            # We need to execute the query again to get column info, or use a different approach
+            # For now, let's use a simpler approach by executing with cursor and getting description
+            try:
+                with self.conn.cursor() as cur:
+                    if params:
+                        cur.execute(query, params)
+                    else:
+                        cur.execute(query)
+
+                    if fetch:
+                        columns = (
+                            [desc[0] for desc in cur.description]
+                            if cur.description
+                            else []
+                        )
+                        results = cur.fetchall()
+
+                        # Convert to list of dictionaries
+                        return [dict(zip(columns, row)) for row in results]
+                    else:
+                        return None
+            except Exception as e:
+                self.logger.error(f"Error in execute_query: {e}")
+                raise
+
+        return raw_results
 
     def __enter__(self):
         """Enter context manager"""

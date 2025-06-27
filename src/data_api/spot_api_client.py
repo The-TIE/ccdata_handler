@@ -225,6 +225,96 @@ class CcdataSpotApiClient(CcdataBaseApiClient):
         logger.info(f"Fetching spot market instruments with params: {params}")
         return self._request("GET", endpoint, params=params)
 
+    def get_ohlc_daily(
+        self,
+        market: str,
+        instrument: str,
+        groups: Optional[List[str]] = None,
+        limit: Optional[int] = None,
+        to_ts: Optional[int] = None,
+        aggregate: int = 1,
+        fill: bool = True,
+        apply_mapping: bool = True,
+        response_format: str = "JSON",
+    ) -> dict:
+        """
+        Convenience method to get daily OHLC data.
+
+        This method wraps get_historical_ohlcv with interval="days".
+        """
+        return self.get_historical_ohlcv(
+            interval="days",
+            market=market,
+            instrument=instrument,
+            groups=groups,
+            limit=limit,
+            to_ts=to_ts,
+            aggregate=aggregate,
+            fill=fill,
+            apply_mapping=apply_mapping,
+            response_format=response_format,
+        )
+
+    def get_ohlc_hourly(
+        self,
+        market: str,
+        instrument: str,
+        groups: Optional[List[str]] = None,
+        limit: Optional[int] = None,
+        to_ts: Optional[int] = None,
+        aggregate: int = 1,
+        fill: bool = True,
+        apply_mapping: bool = True,
+        response_format: str = "JSON",
+    ) -> dict:
+        """
+        Convenience method to get hourly OHLC data.
+
+        This method wraps get_historical_ohlcv with interval="hours".
+        """
+        return self.get_historical_ohlcv(
+            interval="hours",
+            market=market,
+            instrument=instrument,
+            groups=groups,
+            limit=limit,
+            to_ts=to_ts,
+            aggregate=aggregate,
+            fill=fill,
+            apply_mapping=apply_mapping,
+            response_format=response_format,
+        )
+
+    def get_ohlc_minute(
+        self,
+        market: str,
+        instrument: str,
+        groups: Optional[List[str]] = None,
+        limit: Optional[int] = None,
+        to_ts: Optional[int] = None,
+        aggregate: int = 1,
+        fill: bool = True,
+        apply_mapping: bool = True,
+        response_format: str = "JSON",
+    ) -> dict:
+        """
+        Convenience method to get minute OHLC data.
+
+        This method wraps get_historical_ohlcv with interval="minutes".
+        """
+        return self.get_historical_ohlcv(
+            interval="minutes",
+            market=market,
+            instrument=instrument,
+            groups=groups,
+            limit=limit,
+            to_ts=to_ts,
+            aggregate=aggregate,
+            fill=fill,
+            apply_mapping=apply_mapping,
+            response_format=response_format,
+        )
+
 
 if __name__ == "__main__":
     print("Attempting to initialize CcdataSpotApiClient...")

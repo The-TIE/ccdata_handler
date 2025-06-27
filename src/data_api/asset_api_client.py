@@ -40,12 +40,12 @@ class CcdataAssetApiClient(CcdataBaseApiClient):
 
     def get_top_list_general(
         self,
-        page: int = None,
-        page_size: int = None,
-        sort_by: str = None,
-        sort_direction: str = None,
+        page: int = 1,
+        page_size: int = 100,
+        sort_by: str = "CIRCULATING_MKT_CAP_USD",
+        sort_direction: str = "DESC",
         groups: list = None,
-        toplist_quote_asset: str = None,
+        toplist_quote_asset: str = "USD",
         asset_type: str = None,
         asset_industry: str = None,
     ) -> dict:
