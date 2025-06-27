@@ -32,6 +32,9 @@ Thumbs.db
 # LLM Planning Files
 plans/
 
+# json files
+*.json
+
 # Random
 references/data_api/asdf.json
 TODO.md
